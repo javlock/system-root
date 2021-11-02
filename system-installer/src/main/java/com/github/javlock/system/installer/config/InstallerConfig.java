@@ -8,6 +8,7 @@ import org.apache.commons.lang3.builder.ToStringBuilder;
 import org.apache.commons.lang3.builder.ToStringStyle;
 
 import com.github.javlock.system.installer.init.InstallerInit;
+import com.github.javlock.system.installer.init.InstallerInit.VERSIONTYPE;
 
 import lombok.Getter;
 import lombok.Setter;
@@ -21,6 +22,8 @@ public class InstallerConfig {
 	private @Getter @Setter String dbUserName = "javLock";
 	private @Getter @Setter String dbUserPassword = InstallerInit.generatePassword(gen(30, 60),
 			ALPHA_CAPS + ALPHA + SPECIAL_CHARS);
+
+	private @Getter @Setter VERSIONTYPE version = VERSIONTYPE.MAIN;
 
 	private int gen(int min, int max) {
 		return min + (int) (Math.random() * ((max - min) + 1));
