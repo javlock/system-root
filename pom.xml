@@ -22,8 +22,14 @@
 	</properties>
 	<modules>
 		<module>system-apps</module>
+		
 		<module>system-packagemanager</module>
+		<module>system-systemd</module>
+		
 		<module>system-updater</module>
+		<module>system-kernel</module>
+		
+		
 		<module>system-installer</module>
 	</modules>
 
