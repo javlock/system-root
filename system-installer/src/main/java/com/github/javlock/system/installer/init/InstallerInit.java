@@ -21,6 +21,7 @@ import org.eclipse.jgit.api.errors.TransportException;
 import com.github.javlock.system.installer.config.InstallerConfig;
 
 public class InstallerInit {
+
 	public enum INSTALLERMode {
 		/**
 		 * Open installer with gui
@@ -32,16 +33,21 @@ public class InstallerInit {
 		GUILESS
 	}
 
-	public static SecureRandom random = new SecureRandom();
+	public enum VERSIONTYPE {
+		MAIN, DEV
+	}
+
+	public static SecureRandom random = new SecureRandom();;
+
 	/**
 	 * ALPHA_CAPS
 	 */
 	public static final String ALPHA_CAPS = "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
-
 	/**
 	 * ALPHA
 	 */
 	public static final String ALPHA = "abcdefghijklmnopqrstuvwxyz";
+
 	/**
 	 * NUMERIC
 	 */
@@ -87,6 +93,9 @@ public class InstallerInit {
 			}
 			if (arg.equalsIgnoreCase("--debug")) {
 				init.debug = true;
+			}
+			if (arg.equalsIgnoreCase("--dev")) {
+				init.config.setVersion(VERSIONTYPE.DEV);
 			}
 		}
 	}
@@ -185,7 +194,8 @@ public class InstallerInit {
 
 	private void getRepo() throws GitAPIException {
 		if (!repoDir.exists()) {
-			Git git = Git.cloneRepository().setURI(repoUrl).setDirectory(repoDir).setCloneAllBranches(true).call();
+			Git git = Git.cloneRepository().setURI(repoUrl).setDirectory(repoDir)
+					.setBranch(config.getVersion().toString().toLowerCase()).setCloneAllBranches(true).call();
 		}
 	}
 
