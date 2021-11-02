@@ -1,13 +1,8 @@
 package com.github.javlock.system.installer.init;
 
-import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
-import java.io.InputStreamReader;
-import java.io.OutputStream;
-import java.io.OutputStreamWriter;
-import java.nio.charset.StandardCharsets;
 import java.security.SecureRandom;
 
 import org.apache.commons.lang3.SystemUtils;
@@ -17,8 +12,12 @@ import org.eclipse.jgit.api.Git;
 import org.eclipse.jgit.api.errors.GitAPIException;
 import org.eclipse.jgit.api.errors.InvalidRemoteException;
 import org.eclipse.jgit.api.errors.TransportException;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import com.github.javlock.system.installer.config.InstallerConfig;
+import com.github.javlock.system.installer.utils.ExecutorMaster;
+import com.github.javlock.system.installer.utils.ExecutorMasterOutputListener;
 
 public class InstallerInit {
 
@@ -57,6 +56,8 @@ public class InstallerInit {
 	 */
 	public static final String SPECIAL_CHARS = "!@#$%^&*_=+-/";
 
+	public static final Logger LOGGER = LoggerFactory.getLogger("INSTALLER");
+
 	public static String generatePassword(int len, String dic) {
 		StringBuilder result = new StringBuilder();
 		for (int i = 0; i < len; i++) {
@@ -83,6 +84,10 @@ public class InstallerInit {
 			e.printStackTrace();
 		} catch (FileNotFoundException e) {
 			e.printStackTrace();
+		} catch (IOException e) {
+			e.printStackTrace();
+		} catch (InterruptedException e) {
+			e.printStackTrace();
 		}
 	}
 
@@ -105,79 +110,47 @@ public class InstallerInit {
 	INSTALLERMode mode = INSTALLERMode.GUILESS;
 
 	private boolean debug = false;
-
-	File repoDir = new File("/opt/javlock-system");
+	File repoDir = new File(new File("/", "opt"), "javlock-system");
 	String repoUrl = "https://github.com/javlock/system-root";
 
-	private void buildRepo() throws FileNotFoundException {
-		String bash = findProgInSys("bash");
+	private int buildRepo() throws IOException, InterruptedException {
+		String shell = null;
+		try {
+			shell = findProgInSys("bash");
+		} catch (Exception e) {
+			e.printStackTrace();
+
+		}
+		if (shell == null) {
+			shell = findProgInSys("sh");
+		}
 		String maven = findProgInSys("mvn");
 
-		executeProgramms(bash, "cd " + repoDir.getAbsolutePath() + ";pwd;", maven + " clean install && exit");
+		return new ExecutorMaster().setOutputListener(new ExecutorMasterOutputListener() {
+			@Override
+			public void appendInput(String line) {
+				LOGGER.info(line);
+			}
 
+			@Override
+			public void appendOutput(String line) {
+				LOGGER.info(line);
+			}
+		}).parrentCommand(shell).dir(repoDir).command(maven + " clean install && exit 0 ").call();
 	}
 
 	private void checkUser(boolean deb) {
 		String user = SystemUtils.USER_NAME;
-		System.err.println("Пользователь " + user);
+		LOGGER.info("your user {}", user);
 		if (user.equals("root")) {
 		} else {
 			if (!deb) {
-				System.err.println("Установка прервана: вы не root");
+				LOGGER.error("Установка прервана: вы не root");
 				Runtime.getRuntime().exit(5);
 			} else {
-				System.err.println("Установка продолжена: тк включена отладка");
+				LOGGER.warn("Установка продолжена: тк включена отладка");
 			}
 		}
-	}
-
-	private void executeProgramms(String... progs) {
-		String parentProg = progs[0];
-		try {
-			ProcessBuilder processBuilder = new ProcessBuilder(parentProg);
-			processBuilder.redirectErrorStream(true);
-
-			Process process = processBuilder.start();
-			BufferedReader reader = new BufferedReader(new InputStreamReader(process.getInputStream()));
-
-			Thread commandAppender = new Thread((Runnable) () -> {
-				OutputStream os = process.getOutputStream();
-				OutputStreamWriter osw = new OutputStreamWriter(os, StandardCharsets.UTF_8);
-
-				for (int i = 1; i < progs.length; i++) {
-					String string = progs[i];
-					try {
-						osw.append(string).append('\n');
-					} catch (IOException e) {
-						e.printStackTrace();
-					}
-				}
-				try {
-					osw.close();
-				} catch (IOException e1) {
-					e1.printStackTrace();
-				}
-				try {
-					os.close();
-				} catch (IOException e) {
-					e.printStackTrace();
-				}
-
-			}, parentProg);
-			commandAppender.start();
-			String line;
-			while ((line = reader.readLine()) != null) {
-				System.out.println(line);
-			}
-			int exitCode = process.waitFor();
-			commandAppender.join();
-			System.out.println("\nExited with error code : " + exitCode);
-		} catch (IOException e) {
-			e.printStackTrace();
-		} catch (InterruptedException e) {
-			e.printStackTrace();
-		}
-
 	}
 
 	private String findProgInSys(String name) throws FileNotFoundException {
@@ -192,9 +165,13 @@ public class InstallerInit {
 		throw new FileNotFoundException("programm with name " + name + " not found");
 	}
 
-	private void getRepo() throws GitAPIException {
-		if (!repoDir.exists()) {
-			Git git = Git.cloneRepository().setURI(repoUrl).setDirectory(repoDir)
+	private void getRepo() throws GitAPIException, IOException {
+		if (repoDir.exists()) {
+			try (Git git = Git.open(repoDir);) {
+				git.pull().call();
+			}
+		} else {
+			Git.cloneRepository().setURI(repoUrl).setDirectory(repoDir)
 					.setBranch(config.getVersion().toString().toLowerCase()).setCloneAllBranches(true).call();
 		}
 	}
@@ -206,21 +183,24 @@ public class InstallerInit {
 		if (SystemUtils.IS_OS_LINUX) {
 
 		} else {
-			System.err.println("not supported");
+			LOGGER.info("{} is not supported", os);
 			Runtime.getRuntime().exit(4);
 		}
 		checkUser(debug);
 
 	}
 
-	private void install() throws GitAPIException, FileNotFoundException {
+	private void install() throws GitAPIException, IOException, InterruptedException {
 		getRepo();
-		buildRepo();
-
+		if (buildRepo() == 0) {
+			LOGGER.info("Сборка репозитория успешно завершена");
+		} else {
+			LOGGER.info("Сборка репозитория не завершена");
+		}
 	}
 
 	private void printConfig() {
-		System.err.println(config);
+		LOGGER.info(config.toString());
 	}
 
 	private void test() {
