@@ -23,11 +23,12 @@
 	<modules>
 		<module>system-apps</module>
 		<module>system-packagemanager</module>
+		<module>system-updater</module>
 		<module>system-installer</module>
 	</modules>
 
 	<dependencies>
-	<!-- LOGS -->
+		<!-- LOGS -->
 		<dependency>
 			<groupId>org.slf4j</groupId>
 			<artifactId>slf4j-api</artifactId>
@@ -105,6 +106,34 @@
 			</plugin>
 
 			<!-- FINDBUGS -->
+
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-javadoc-plugin</artifactId>
+				<version>3.3.1</version>
+				<goals>
+					<goal>jar</goal>
+				</goals>
+			</plugin>
 		</plugins>
 	</build>
+
+	<reporting>
+		<excludeDefaults>true</excludeDefaults>
+		<plugins>
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-javadoc-plugin</artifactId>
+				<version>3.3.1</version>				
+				<reportSets>
+					<reportSet>
+						<reports>
+							<report>javadoc-no-fork</report>
+							<report>test-javadoc-no-fork</report>
+						</reports>						
+					</reportSet>
+				</reportSets>
+			</plugin>
+		</plugins>
+	</reporting>
 </project>

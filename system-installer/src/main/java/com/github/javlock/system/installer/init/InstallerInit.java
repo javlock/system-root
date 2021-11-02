@@ -1,6 +1,13 @@
 package com.github.javlock.system.installer.init;
 
+import java.io.BufferedReader;
 import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.IOException;
+import java.io.InputStreamReader;
+import java.io.OutputStream;
+import java.io.OutputStreamWriter;
+import java.nio.charset.StandardCharsets;
 import java.security.SecureRandom;
 
 import org.apache.commons.lang3.SystemUtils;
@@ -15,23 +22,42 @@ import com.github.javlock.system.installer.config.InstallerConfig;
 
 public class InstallerInit {
 	public enum INSTALLERMode {
-		GUI, GUILESS
+		/**
+		 * Open installer with gui
+		 */
+		GUI,
+		/**
+		 * Open installer without gui
+		 */
+		GUILESS
 	}
 
 	public static SecureRandom random = new SecureRandom();
-
+	/**
+	 * ALPHA_CAPS
+	 */
 	public static final String ALPHA_CAPS = "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
+
+	/**
+	 * ALPHA
+	 */
 	public static final String ALPHA = "abcdefghijklmnopqrstuvwxyz";
+	/**
+	 * NUMERIC
+	 */
 	public static final String NUMERIC = "0123456789";
+	/**
+	 * SPECIAL_CHARS
+	 */
 	public static final String SPECIAL_CHARS = "!@#$%^&*_=+-/";
 
 	public static String generatePassword(int len, String dic) {
-		String result = "";
+		StringBuilder result = new StringBuilder();
 		for (int i = 0; i < len; i++) {
 			int index = random.nextInt(dic.length());
-			result += dic.charAt(index);
+			result.append(dic.charAt(index));
 		}
-		return result;
+		return result.toString();
 	}
 
 	public static void main(String[] args) {
@@ -48,6 +74,8 @@ public class InstallerInit {
 		} catch (TransportException e) {
 			e.printStackTrace();
 		} catch (GitAPIException e) {
+			e.printStackTrace();
+		} catch (FileNotFoundException e) {
 			e.printStackTrace();
 		}
 	}
@@ -69,7 +97,14 @@ public class InstallerInit {
 
 	private boolean debug = false;
 
-	private void buildRepo() {
+	File repoDir = new File("/opt/javlock-system");
+	String repoUrl = "https://github.com/javlock/system-root";
+
+	private void buildRepo() throws FileNotFoundException {
+		String bash = findProgInSys("bash");
+		String maven = findProgInSys("mvn");
+
+		executeProgramms(bash, "cd " + repoDir.getAbsolutePath() + ";pwd;", maven + " clean install && exit");
 
 	}
 
@@ -79,17 +114,77 @@ public class InstallerInit {
 		if (user.equals("root")) {
 		} else {
 			if (!deb) {
+				System.err.println("Установка прервана: вы не root");
 				Runtime.getRuntime().exit(5);
 			} else {
-				System.err.println("не вышли тк включена отладка");
+				System.err.println("Установка продолжена: тк включена отладка");
 			}
 		}
 	}
 
-	private void getRepo() throws InvalidRemoteException, TransportException, GitAPIException {
-		File repoDir = new File("/opt/javlock-system");
+	private void executeProgramms(String... progs) {
+		String parentProg = progs[0];
+		try {
+			ProcessBuilder processBuilder = new ProcessBuilder(parentProg);
+			processBuilder.redirectErrorStream(true);
+
+			Process process = processBuilder.start();
+			BufferedReader reader = new BufferedReader(new InputStreamReader(process.getInputStream()));
+
+			Thread commandAppender = new Thread((Runnable) () -> {
+				OutputStream os = process.getOutputStream();
+				OutputStreamWriter osw = new OutputStreamWriter(os, StandardCharsets.UTF_8);
+
+				for (int i = 1; i < progs.length; i++) {
+					String string = progs[i];
+					try {
+						osw.append(string).append('\n');
+					} catch (IOException e) {
+						e.printStackTrace();
+					}
+				}
+				try {
+					osw.close();
+				} catch (IOException e1) {
+					e1.printStackTrace();
+				}
+				try {
+					os.close();
+				} catch (IOException e) {
+					e.printStackTrace();
+				}
+
+			}, parentProg);
+			commandAppender.start();
+			String line;
+			while ((line = reader.readLine()) != null) {
+				System.out.println(line);
+			}
+			int exitCode = process.waitFor();
+			commandAppender.join();
+			System.out.println("\nExited with error code : " + exitCode);
+		} catch (IOException e) {
+			e.printStackTrace();
+		} catch (InterruptedException e) {
+			e.printStackTrace();
+		}
+
+	}
+
+	private String findProgInSys(String name) throws FileNotFoundException {
+		final String PATH = System.getenv("PATH");
+		String[] ar = PATH.split(":");
+		for (String string : ar) {
+			File testFile = new File(string, name);
+			if (testFile.exists()) {
+				return testFile.getAbsolutePath();
+			}
+		}
+		throw new FileNotFoundException("programm with name " + name + " not found");
+	}
+
+	private void getRepo() throws GitAPIException {
 		if (!repoDir.exists()) {
-			String repoUrl = "https://github.com/javlock/system-root";
 			Git git = Git.cloneRepository().setURI(repoUrl).setDirectory(repoDir).setCloneAllBranches(true).call();
 		}
 	}
@@ -108,7 +203,7 @@ public class InstallerInit {
 
 	}
 
-	private void install() throws InvalidRemoteException, TransportException, GitAPIException {
+	private void install() throws GitAPIException, FileNotFoundException {
 		getRepo();
 		buildRepo();
 
