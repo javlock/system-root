@@ -49,7 +49,7 @@ public class Updater extends Thread {
 	}
 
 	private void update() {
-
+		System.err.println("получено обновление");
 	}
 
 	private boolean updateNeeded() throws WrongRepositoryStateException, InvalidConfigurationException,
@@ -63,6 +63,7 @@ public class Updater extends Thread {
 			FetchResult result = pullResult.getFetchResult();
 
 			int index = 0;
+
 			for (TrackingRefUpdate trackingRefUpdate : result.getTrackingRefUpdates()) {
 				System.err.println("ID:" + index + ":"
 						+ ToStringBuilder.reflectionToString(trackingRefUpdate, ToStringStyle.MULTI_LINE_STYLE));
@@ -70,6 +71,7 @@ public class Updater extends Thread {
 				System.err.println();
 				index++;
 			}
+			return !result.getTrackingRefUpdates().isEmpty();
 		}
 		System.err.println();
 		System.err.println();
