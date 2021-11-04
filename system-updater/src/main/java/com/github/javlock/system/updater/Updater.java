@@ -3,6 +3,8 @@ package com.github.javlock.system.updater;
 import java.io.File;
 import java.io.IOException;
 
+import org.apache.commons.lang3.builder.ToStringBuilder;
+import org.apache.commons.lang3.builder.ToStringStyle;
 import org.eclipse.jgit.api.Git;
 import org.eclipse.jgit.api.PullResult;
 import org.eclipse.jgit.api.errors.CanceledException;
@@ -55,15 +57,13 @@ public class Updater extends Thread {
 
 		PullResult pullResult = Git.open(repoDir).pull().call();
 
-		// System.err.println(ToStringBuilder.reflectionToString(pullResult,
-		// ToStringStyle.MULTI_LINE_STYLE));
-
-		System.err.println(pullResult.isSuccessful());
-
 		if (pullResult.isSuccessful()) {
-			System.err.println("TEEEEEEEEEEEEEEEEEEEE");
+			System.err.println("pullResult.isSuccessful()");
+			FetchResult result = pullResult.getFetchResult();
+
+			System.err.println(ToStringBuilder.reflectionToString(result, ToStringStyle.MULTI_LINE_STYLE));
+
 		}
-		FetchResult fetchResult = pullResult.getFetchResult();
 
 		return false;
 	}
