@@ -60,6 +60,8 @@ public class Updater extends Thread {
 
 		System.err.println(ToStringBuilder.reflectionToString(pullResult, ToStringStyle.MULTI_LINE_STYLE));
 
+		System.err.println(pullResult.isSuccessful());
+
 		FetchResult re = pullResult.getFetchResult();
 
 		return false;
