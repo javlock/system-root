@@ -17,6 +17,7 @@ import org.eclipse.jgit.api.errors.RefNotFoundException;
 import org.eclipse.jgit.api.errors.TransportException;
 import org.eclipse.jgit.api.errors.WrongRepositoryStateException;
 import org.eclipse.jgit.transport.FetchResult;
+import org.eclipse.jgit.transport.TrackingRefUpdate;
 
 public class Updater extends Thread {
 	private File repoDir = new File("/opt/javlock-system");
@@ -61,9 +62,17 @@ public class Updater extends Thread {
 			System.err.println("pullResult.isSuccessful()");
 			FetchResult result = pullResult.getFetchResult();
 
-			System.err.println(ToStringBuilder.reflectionToString(result, ToStringStyle.MULTI_LINE_STYLE));
+			int index = 0;
+			for (TrackingRefUpdate trackingRefUpdate : result.getTrackingRefUpdates()) {
+				System.err.println("ID:" + index + ":"
+						+ ToStringBuilder.reflectionToString(trackingRefUpdate, ToStringStyle.MULTI_LINE_STYLE));
 
+				System.err.println();
+				index++;
+			}
 		}
+		System.err.println();
+		System.err.println();
 
 		return false;
 	}
