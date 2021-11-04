@@ -62,6 +62,10 @@ public class Updater extends Thread {
 
 		System.err.println(pullResult.isSuccessful());
 
+		if (pullResult.isSuccessful()) {
+			System.err.println("TEEEEEEEEEEEEEEEEEEEE");
+		}
+
 		FetchResult re = pullResult.getFetchResult();
 
 		return false;
