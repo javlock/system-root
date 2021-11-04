@@ -7,10 +7,11 @@
 		<artifactId>system-root</artifactId>
 		<version>0.0.1-SNAPSHOT</version>
 	</parent>
-	<artifactId>system-installer</artifactId>
+	<artifactId>system-kernel</artifactId>
 	<properties>
-		<mainClass>com.github.javlock.system.installer.init.InstallerInit</mainClass>
+		<mainClass>com.github.javlock.system.kernel.init.KernelInit</mainClass>
 	</properties>
+
 	<build>
 		<plugins>
 			<!--JAR -->
@@ -18,7 +19,7 @@
 				<artifactId>maven-assembly-plugin</artifactId>
 				<executions>
 					<execution>
-						<id>make-Installer</id> 
+						<id>make-Kernel</id>
 						<phase>package</phase>
 						<configuration>
 							<finalName>${project.artifactId}-${project.version}-git-${git.commit.id.full}</finalName>
@@ -35,26 +36,6 @@
 							<goal>single</goal>
 						</goals>
 					</execution>
-
-					<execution>
-						<id>make-Aalogprof allow all</id> 
-						<phase>package</phase>
-						<configuration>
-							<finalName>Aalogprof-git-${git.commit.id.full}</finalName>
-							<archive>
-								<manifest>
-									<mainClass>com.github.javlock.system.otherdemo.Aalogprof</mainClass>
-								</manifest>
-							</archive>
-							<descriptorRefs>
-								<descriptorRef>jar-with-dependencies</descriptorRef>
-							</descriptorRefs>
-						</configuration>
-						<goals>
-							<goal>single</goal>
-						</goals>
-					</execution>
-
 				</executions>
 			</plugin>
 			<!--JAR -->

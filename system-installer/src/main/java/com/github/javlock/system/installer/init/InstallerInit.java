@@ -3,7 +3,11 @@ package com.github.javlock.system.installer.init;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
+import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
+import java.nio.file.StandardOpenOption;
 import java.security.SecureRandom;
+import java.util.ArrayList;
 
 import org.apache.commons.lang3.SystemUtils;
 import org.apache.commons.lang3.builder.ToStringBuilder;
@@ -108,13 +112,14 @@ public class InstallerInit {
 	InstallerConfig config = new InstallerConfig();
 
 	INSTALLERMode mode = INSTALLERMode.GUILESS;
-
 	private boolean debug = false;
 	File repoDir = new File(new File("/", "opt"), "javlock-system");
+
 	String repoUrl = "https://github.com/javlock/system-root";
 
+	String shell = null;
+
 	private int buildRepo() throws IOException, InterruptedException {
-		String shell = null;
 		try {
 			shell = findProgInSys("bash");
 		} catch (Exception e) {
@@ -153,6 +158,62 @@ public class InstallerInit {
 		}
 	}
 
+	private String createServiceFor(File repository, String moduleName) throws IOException {
+		StringBuilder builder = new StringBuilder();
+		System.err.println(moduleName);
+		// File executableJarFile =
+		// System.out.println("InstallerInit.createServiceFor()" +
+		// executableJarFile.getAbsolutePath());
+		return builder.toString();
+	}
+
+	// TODO /usr/lib/systemd/system/
+	private void createServices() throws IOException, InterruptedException {
+		File servicesDir = findServicesDir();
+
+		// updater
+		ArrayList<File> jars = new ArrayList<>();
+		findJarWithDeps(jars, repoDir.getAbsolutePath());
+		for (File file : jars) {
+			LOGGER.info("JARRRS:{}", file);
+		}
+
+		writeServiceFor(servicesDir, "system-updater");
+		writeServiceFor(servicesDir, "system-kernel");
+
+		// update daemon
+		new ExecutorMaster().parrentCommand(shell).dir(repoDir).command("systemctl daemon-reload").call();
+
+		// install
+		new ExecutorMaster().parrentCommand(shell).dir(repoDir).command("systemctl daemon-reload").call();
+		new ExecutorMaster().parrentCommand(shell).dir(repoDir).command("systemctl daemon-reload").call();
+		new ExecutorMaster().parrentCommand(shell).dir(repoDir).command("systemctl daemon-reload").call();
+
+	}
+
+	private void findJarWithDeps(ArrayList<File> jars, String repository) throws IOException {
+
+		File root = new File(repository);
+		File[] list = root.listFiles();
+
+		if (list == null) {
+			return;
+		}
+
+		for (File f : list) {
+			if (f.isDirectory()) {
+				findJarWithDeps(jars, f.getAbsolutePath());
+			} else {
+				String name = f.getName().toLowerCase();
+				if (name.endsWith("-jar-with-dependencies.jar")) {
+					jars.add(f);
+				}
+
+			}
+		}
+		// return null;
+	}
+
 	private String findProgInSys(String name) throws FileNotFoundException {
 		final String PATH = System.getenv("PATH");
 		String[] ar = PATH.split(":");
@@ -163,6 +224,28 @@ public class InstallerInit {
 			}
 		}
 		throw new FileNotFoundException("programm with name " + name + " not found");
+	}
+
+	private File findServicesDir() throws FileNotFoundException {
+		File dir1 = new File("/", "usr/lib/systemd/system/");
+		File dir2 = new File("/", "etc/systemd/system/");
+
+		File ret = null;
+
+		if (dir1.exists()) {
+			ret = dir1;
+		}
+		if (dir2.exists()) {
+			ret = dir2;
+		}
+
+		if (ret != null) {
+			LOGGER.info("Найден путь до сервисов {}", ret);
+		} else {
+			throw new FileNotFoundException("Не найден путь до сервисов");
+
+		}
+		return ret;
 	}
 
 	private void getRepo() throws GitAPIException, IOException {
@@ -197,6 +280,8 @@ public class InstallerInit {
 		} else {
 			LOGGER.info("Сборка репозитория не завершена");
 		}
+
+		createServices();
 	}
 
 	private void printConfig() {
@@ -209,5 +294,15 @@ public class InstallerInit {
 	@Override
 	public String toString() {
 		return ToStringBuilder.reflectionToString(this, ToStringStyle.MULTI_LINE_STYLE);
+	}
+
+	private void writeServiceFor(File servicesDir, String moduleName) throws IOException {
+		File serviceFile = new File(servicesDir, "javlock-" + moduleName + ".service");
+		if (!serviceFile.exists()) {
+			LOGGER.info("File {} created:{}", serviceFile, serviceFile.createNewFile());
+		}
+		String serviceData = createServiceFor(repoDir, moduleName);
+		Files.write(serviceFile.toPath(), serviceData.getBytes(StandardCharsets.UTF_8),
+				StandardOpenOption.TRUNCATE_EXISTING);
 	}
 }
