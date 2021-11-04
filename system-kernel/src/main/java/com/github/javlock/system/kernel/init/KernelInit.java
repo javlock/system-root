@@ -1,10 +1,12 @@
 package com.github.javlock.system.kernel.init;
 
+import com.github.javlock.system.kernel.Kernel;
+
 public class KernelInit {
 
 	public static void main(String[] args) {
-		// TODO Auto-generated method stub
-
+		Kernel kernel = new Kernel();
+		kernel.init();
+		kernel.start();
 	}
-
 }

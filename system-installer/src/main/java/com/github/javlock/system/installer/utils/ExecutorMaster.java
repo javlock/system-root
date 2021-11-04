@@ -9,13 +9,16 @@ import java.io.OutputStreamWriter;
 import java.nio.charset.StandardCharsets;
 import java.util.concurrent.CopyOnWriteArrayList;
 
+import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
+
+@SuppressFBWarnings(value = "EI_EXPOSE_REP2")
 public class ExecutorMaster {
 	ProcessBuilder processBuilder = new ProcessBuilder();
-
 	private String parentProg;
 	private ExecutorMasterOutputListener outputListener;
 
 	CopyOnWriteArrayList<String> progs = new CopyOnWriteArrayList<>();
+	OutputStreamWriter osw;
 
 	public int call() throws IOException, InterruptedException {
 		processBuilder.redirectErrorStream(true);
@@ -24,7 +27,7 @@ public class ExecutorMaster {
 		BufferedReader reader = new BufferedReader(new InputStreamReader(process.getInputStream()));
 		Thread commandAppender = new Thread((Runnable) () -> {
 			OutputStream os = process.getOutputStream();
-			OutputStreamWriter osw = new OutputStreamWriter(os, StandardCharsets.UTF_8);
+			osw = new OutputStreamWriter(os, StandardCharsets.UTF_8);
 
 			for (String string : progs) {
 				try {

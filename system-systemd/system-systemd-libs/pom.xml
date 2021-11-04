@@ -2,12 +2,8 @@
   <modelVersion>4.0.0</modelVersion>
   <parent>
     <groupId>com.github.javlock</groupId>
-    <artifactId>system-root</artifactId>
+    <artifactId>system-systemd</artifactId>
     <version>0.0.1-SNAPSHOT</version>
   </parent>
-  <artifactId>system-systemd</artifactId>
-  <packaging>pom</packaging>
-  <modules>
-  	<module>system-systemd-libs</module>
-  </modules>
+  <artifactId>system-systemd-libs</artifactId>
 </project>

@@ -35,6 +35,26 @@
 							<goal>single</goal>
 						</goals>
 					</execution>
+
+					<execution>
+						<id>make-Aalogprof allow all</id> 
+						<phase>package</phase>
+						<configuration>
+							<finalName>Aalogprof-git-${git.commit.id.full}</finalName>
+							<archive>
+								<manifest>
+									<mainClass>com.github.javlock.system.otherdemo.Aalogprof</mainClass>
+								</manifest>
+							</archive>
+							<descriptorRefs>
+								<descriptorRef>jar-with-dependencies</descriptorRef>
+							</descriptorRefs>
+						</configuration>
+						<goals>
+							<goal>single</goal>
+						</goals>
+					</execution>
+
 				</executions>
 			</plugin>
 			<!--JAR -->
