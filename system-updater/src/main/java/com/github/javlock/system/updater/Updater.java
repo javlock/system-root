@@ -16,7 +16,6 @@ import org.eclipse.jgit.api.errors.RefNotAdvertisedException;
 import org.eclipse.jgit.api.errors.RefNotFoundException;
 import org.eclipse.jgit.api.errors.TransportException;
 import org.eclipse.jgit.api.errors.WrongRepositoryStateException;
-import org.eclipse.jgit.transport.FetchResult;
 
 public class Updater extends Thread {
 	private File repoDir = new File("/opt/javlock-system");
@@ -54,6 +53,7 @@ public class Updater extends Thread {
 	private boolean updateNeeded() throws WrongRepositoryStateException, InvalidConfigurationException,
 			InvalidRemoteException, CanceledException, RefNotFoundException, RefNotAdvertisedException, NoHeadException,
 			TransportException, GitAPIException, IOException {
+
 		PullResult pullResult = Git.open(repoDir).pull().call();
 
 		System.err.println(pullResult);
@@ -65,8 +65,6 @@ public class Updater extends Thread {
 		if (pullResult.isSuccessful()) {
 			System.err.println("TEEEEEEEEEEEEEEEEEEEE");
 		}
-
-		FetchResult re = pullResult.getFetchResult();
 
 		return false;
 	}
