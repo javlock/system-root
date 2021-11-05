@@ -14,16 +14,14 @@ import javax.naming.ConfigurationException;
 import org.apache.commons.lang3.SystemUtils;
 import org.apache.commons.lang3.builder.ToStringBuilder;
 import org.apache.commons.lang3.builder.ToStringStyle;
-import org.eclipse.jgit.api.Git;
-import org.eclipse.jgit.api.errors.GitAPIException;
-import org.eclipse.jgit.api.errors.InvalidRemoteException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.github.javlock.system.apidata.Paths;
 import com.github.javlock.system.apiutils.ExecutorMaster;
-import com.github.javlock.system.apiutils.ExecutorMasterOutputListener;
 import com.github.javlock.system.apiutils.os.OsUtils;
+import com.github.javlock.system.apiutils.repo.git.GitHelper;
+import com.github.javlock.system.apiutils.repo.maven.MavenHelper;
 import com.github.javlock.system.installer.config.InstallerConfig;
 import com.github.javlock.system.installer.gui.InstallerGui;
 
@@ -79,17 +77,12 @@ public class InstallerInit {
 		try {
 			InstallerInit init = new InstallerInit();
 			readVars(init, args);
-			init.printConfig();
 			init.init();
 			init.install();
 			init.test();
-		} catch (InvalidRemoteException e) {
-			e.printStackTrace();
 		} catch (FileNotFoundException e) {
 			e.printStackTrace();
 		} catch (InterruptedException e) {
-			e.printStackTrace();
-		} catch (GitAPIException e) {
 			e.printStackTrace();
 		} catch (IOException e) {
 			e.printStackTrace();
@@ -98,7 +91,33 @@ public class InstallerInit {
 		}
 	}
 
+	private static void printHelp() {
+		StringBuilder builder = new StringBuilder();
+		builder.append('\n');
+		builder.append("--gui for start Info Frame").append('\n');
+		builder.append("--dev for start install dev version").append('\n');
+		builder.append("--debug for start install with debug messages").append('\n');
+		builder.append("--ok after set needed args , for продолжения установки").append('\n');// FIXME дописать
+		builder.append('\n').append('\n').append('\n');
+		builder.append("Exit statuses:").append('\n');
+		builder.append(1).append(" For:1").append('\n');
+		builder.append(2).append(" For: Не удалось получить/обновить репозиторий").append('\n');
+		builder.append(3).append(" For: Args check: args is empty (args[].length == 0)").append('\n');
+		builder.append(4).append(" For: OS check: you OS is not supported").append('\n');
+		builder.append(5).append(" For: User check: you no root user").append('\n');
+		builder.append(6).append(" For: Не удалось собрать репозиторий").append('\n');
+		builder.append(7).append(" For:7").append('\n');
+		builder.append(8).append(" For:8").append('\n');
+		builder.append(9).append(" For:9").append('\n');
+
+		LOGGER.info(builder.toString());
+	}
+
 	private static void readVars(InstallerInit init, String[] args) throws ConfigurationException {
+		if (args.length == 0) {
+			printHelp();
+			Runtime.getRuntime().exit(3);
+		}
 		for (String arg : args) {
 			if (arg.equalsIgnoreCase("--gui")) {
 				init.mode = INSTALLERMode.GUI;
@@ -115,9 +134,10 @@ public class InstallerInit {
 				init.debug = true;
 			}
 		}
-		LOGGER.info(init.config.toString());
+		LOGGER.info("\n{}", init.config.toString());
 		if (!init.config.isPrepare()) {
-			throw new ConfigurationException("");
+			// FIXME дописать
+			throw new ConfigurationException("You not set arg after configurat***: --ok");
 		}
 	}
 
@@ -125,25 +145,6 @@ public class InstallerInit {
 
 	INSTALLERMode mode = INSTALLERMode.GUILESS;
 	private boolean debug = false;
-
-	String shell = null;
-
-	private int buildRepo() throws IOException, InterruptedException {
-		shell = OsUtils.getSystemShell();
-		String maven = OsUtils.findProgInSys("mvn");
-
-		return new ExecutorMaster().setOutputListener(new ExecutorMasterOutputListener() {
-			@Override
-			public void appendInput(String line) {
-				LOGGER.info(line);
-			}
-
-			@Override
-			public void appendOutput(String line) {
-				LOGGER.info(line);
-			}
-		}).parrentCommand(shell).dir(Paths.repoDir).command(maven + " clean install && exit 0 ").call();
-	}
 
 	private void checkUser(boolean deb) {
 		String user = SystemUtils.USER_NAME;
@@ -182,6 +183,7 @@ public class InstallerInit {
 		writeServiceFor(servicesDir, "system-updater");
 		writeServiceFor(servicesDir, "system-kernel");
 
+		String shell = OsUtils.getSystemShell();
 		// update daemon
 		new ExecutorMaster().parrentCommand(shell).dir(Paths.repoDir).command("systemctl daemon-reload").call();
 
@@ -193,14 +195,11 @@ public class InstallerInit {
 	}
 
 	private void findJarWithDeps(ArrayList<File> jars, String repository) throws IOException {
-
 		File root = new File(repository);
 		File[] list = root.listFiles();
-
 		if (list == null) {
 			return;
 		}
-
 		for (File f : list) {
 			if (f.isDirectory()) {
 				findJarWithDeps(jars, f.getAbsolutePath());
@@ -212,7 +211,6 @@ public class InstallerInit {
 
 			}
 		}
-		// return null;
 	}
 
 	private File findServicesDir() throws FileNotFoundException {
@@ -230,20 +228,8 @@ public class InstallerInit {
 			LOGGER.info("Найден путь до сервисов {}", ret);
 		} else {
 			throw new FileNotFoundException("Не найден путь до сервисов");
-
 		}
 		return ret;
-	}
-
-	private void getRepo() throws GitAPIException, IOException {
-		if (Paths.repoDir.exists()) {
-			try (Git git = Git.open(Paths.repoDir);) {
-				git.pull().call();
-			}
-		} else {
-			Git.cloneRepository().setURI(Paths.repoUrl).setDirectory(Paths.repoDir)
-					.setBranch(config.getVersion().toString().toLowerCase()).setCloneAllBranches(true).call();
-		}
 	}
 
 	private void init() {
@@ -266,21 +252,27 @@ public class InstallerInit {
 
 	}
 
-	private void install() throws GitAPIException, IOException, InterruptedException {
-		getRepo();
-		if (buildRepo() == 0) {
+	private void install() throws IOException, InterruptedException {
+		String branch = config.getVersion().toString().toLowerCase();
+
+		if (GitHelper.getRepo(Paths.repoUrl, Paths.repoDir, branch)) {
+			LOGGER.info("Проверка git репозитория успешно завершена");
+		} else {
+			LOGGER.error("Проверка git репозитория не завершена");
+			Runtime.getRuntime().exit(2);
+		}
+		if (MavenHelper.buildRepo(Paths.repoDir)) {
 			LOGGER.info("Сборка репозитория успешно завершена");
 		} else {
-			LOGGER.info("Сборка репозитория не завершена");
+			LOGGER.error("Сборка репозитория не завершена");
+			Runtime.getRuntime().exit(6);
 		}
 
 		createServices();
 	}
 
-	private void printConfig() {
-	}
-
 	private void test() {
+		// TODO написать тесты для отладки сервисов после установки
 	}
 
 	@Override
@@ -289,6 +281,7 @@ public class InstallerInit {
 	}
 
 	private void writeServiceFor(File servicesDir, String moduleName) throws IOException {
+		// TODO переписать для использования модуля system-systemd
 		File serviceFile = new File(servicesDir, "javlock-" + moduleName + ".service");
 		if (!serviceFile.exists()) {
 			LOGGER.info("File {} created:{}", serviceFile, serviceFile.createNewFile());
