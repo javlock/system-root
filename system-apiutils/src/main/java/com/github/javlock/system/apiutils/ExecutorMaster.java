@@ -1,4 +1,4 @@
-package com.github.javlock.system.installer.utils;
+package com.github.javlock.system.apiutils;
 
 import java.io.BufferedReader;
 import java.io.File;

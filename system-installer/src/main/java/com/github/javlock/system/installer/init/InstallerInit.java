@@ -9,19 +9,22 @@ import java.nio.file.StandardOpenOption;
 import java.security.SecureRandom;
 import java.util.ArrayList;
 
+import javax.naming.ConfigurationException;
+
 import org.apache.commons.lang3.SystemUtils;
 import org.apache.commons.lang3.builder.ToStringBuilder;
 import org.apache.commons.lang3.builder.ToStringStyle;
 import org.eclipse.jgit.api.Git;
 import org.eclipse.jgit.api.errors.GitAPIException;
 import org.eclipse.jgit.api.errors.InvalidRemoteException;
-import org.eclipse.jgit.api.errors.TransportException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.github.javlock.system.apidata.Paths;
+import com.github.javlock.system.apiutils.ExecutorMaster;
+import com.github.javlock.system.apiutils.ExecutorMasterOutputListener;
+import com.github.javlock.system.apiutils.os.OsUtils;
 import com.github.javlock.system.installer.config.InstallerConfig;
-import com.github.javlock.system.installer.utils.ExecutorMaster;
-import com.github.javlock.system.installer.utils.ExecutorMasterOutputListener;
 
 public class InstallerInit {
 
@@ -75,37 +78,45 @@ public class InstallerInit {
 		try {
 			InstallerInit init = new InstallerInit();
 			readVars(init, args);
-
 			init.printConfig();
 			init.init();
 			init.install();
 			init.test();
 		} catch (InvalidRemoteException e) {
 			e.printStackTrace();
-		} catch (TransportException e) {
+		} catch (FileNotFoundException e) {
+			e.printStackTrace();
+		} catch (InterruptedException e) {
 			e.printStackTrace();
 		} catch (GitAPIException e) {
 			e.printStackTrace();
-		} catch (FileNotFoundException e) {
-			e.printStackTrace();
 		} catch (IOException e) {
 			e.printStackTrace();
-		} catch (InterruptedException e) {
+		} catch (ConfigurationException e) {
 			e.printStackTrace();
 		}
 	}
 
-	private static void readVars(InstallerInit init, String[] args) {
+	private static void readVars(InstallerInit init, String[] args) throws ConfigurationException {
 		for (String arg : args) {
 			if (arg.equalsIgnoreCase("--gui")) {
 				init.mode = INSTALLERMode.GUI;
 			}
-			if (arg.equalsIgnoreCase("--debug")) {
-				init.debug = true;
-			}
 			if (arg.equalsIgnoreCase("--dev")) {
 				init.config.setVersion(VERSIONTYPE.DEV);
 			}
+
+			if (arg.equalsIgnoreCase("--ok")) {
+				init.config.setPrepare(true);
+			}
+
+			if (arg.equalsIgnoreCase("--debug")) {
+				init.debug = true;
+			}
+		}
+		LOGGER.info(init.config.toString());
+		if (!init.config.isPrepare()) {
+			throw new ConfigurationException("");
 		}
 	}
 
@@ -113,23 +124,12 @@ public class InstallerInit {
 
 	INSTALLERMode mode = INSTALLERMode.GUILESS;
 	private boolean debug = false;
-	File repoDir = new File(new File("/", "opt"), "javlock-system");
-
-	String repoUrl = "https://github.com/javlock/system-root";
 
 	String shell = null;
 
 	private int buildRepo() throws IOException, InterruptedException {
-		try {
-			shell = findProgInSys("bash");
-		} catch (Exception e) {
-			e.printStackTrace();
-
-		}
-		if (shell == null) {
-			shell = findProgInSys("sh");
-		}
-		String maven = findProgInSys("mvn");
+		shell = OsUtils.getSystemShell();
+		String maven = OsUtils.findProgInSys("mvn");
 
 		return new ExecutorMaster().setOutputListener(new ExecutorMasterOutputListener() {
 			@Override
@@ -141,7 +141,7 @@ public class InstallerInit {
 			public void appendOutput(String line) {
 				LOGGER.info(line);
 			}
-		}).parrentCommand(shell).dir(repoDir).command(maven + " clean install && exit 0 ").call();
+		}).parrentCommand(shell).dir(Paths.repoDir).command(maven + " clean install && exit 0 ").call();
 	}
 
 	private void checkUser(boolean deb) {
@@ -173,7 +173,7 @@ public class InstallerInit {
 
 		// updater
 		ArrayList<File> jars = new ArrayList<>();
-		findJarWithDeps(jars, repoDir.getAbsolutePath());
+		findJarWithDeps(jars, Paths.repoDir.getAbsolutePath());
 		for (File file : jars) {
 			LOGGER.info("JARRRS:{}", file);
 		}
@@ -182,12 +182,12 @@ public class InstallerInit {
 		writeServiceFor(servicesDir, "system-kernel");
 
 		// update daemon
-		new ExecutorMaster().parrentCommand(shell).dir(repoDir).command("systemctl daemon-reload").call();
+		new ExecutorMaster().parrentCommand(shell).dir(Paths.repoDir).command("systemctl daemon-reload").call();
 
 		// install
-		new ExecutorMaster().parrentCommand(shell).dir(repoDir).command("systemctl daemon-reload").call();
-		new ExecutorMaster().parrentCommand(shell).dir(repoDir).command("systemctl daemon-reload").call();
-		new ExecutorMaster().parrentCommand(shell).dir(repoDir).command("systemctl daemon-reload").call();
+		new ExecutorMaster().parrentCommand(shell).dir(Paths.repoDir).command("systemctl daemon-reload").call();
+		new ExecutorMaster().parrentCommand(shell).dir(Paths.repoDir).command("systemctl daemon-reload").call();
+		new ExecutorMaster().parrentCommand(shell).dir(Paths.repoDir).command("systemctl daemon-reload").call();
 
 	}
 
@@ -214,18 +214,6 @@ public class InstallerInit {
 		// return null;
 	}
 
-	private String findProgInSys(String name) throws FileNotFoundException {
-		final String PATH = System.getenv("PATH");
-		String[] ar = PATH.split(":");
-		for (String string : ar) {
-			File testFile = new File(string, name);
-			if (testFile.exists()) {
-				return testFile.getAbsolutePath();
-			}
-		}
-		throw new FileNotFoundException("programm with name " + name + " not found");
-	}
-
 	private File findServicesDir() throws FileNotFoundException {
 		File dir1 = new File("/", "usr/lib/systemd/system/");
 		File dir2 = new File("/", "etc/systemd/system/");
@@ -249,12 +237,12 @@ public class InstallerInit {
 	}
 
 	private void getRepo() throws GitAPIException, IOException {
-		if (repoDir.exists()) {
-			try (Git git = Git.open(repoDir);) {
+		if (Paths.repoDir.exists()) {
+			try (Git git = Git.open(Paths.repoDir);) {
 				git.pull().call();
 			}
 		} else {
-			Git.cloneRepository().setURI(repoUrl).setDirectory(repoDir)
+			Git.cloneRepository().setURI(Paths.repoUrl).setDirectory(Paths.repoDir)
 					.setBranch(config.getVersion().toString().toLowerCase()).setCloneAllBranches(true).call();
 		}
 	}
@@ -285,7 +273,6 @@ public class InstallerInit {
 	}
 
 	private void printConfig() {
-		LOGGER.info(config.toString());
 	}
 
 	private void test() {
@@ -301,7 +288,7 @@ public class InstallerInit {
 		if (!serviceFile.exists()) {
 			LOGGER.info("File {} created:{}", serviceFile, serviceFile.createNewFile());
 		}
-		String serviceData = createServiceFor(repoDir, moduleName);
+		String serviceData = createServiceFor(Paths.repoDir, moduleName);
 		Files.write(serviceFile.toPath(), serviceData.getBytes(StandardCharsets.UTF_8),
 				StandardOpenOption.TRUNCATE_EXISTING);
 	}

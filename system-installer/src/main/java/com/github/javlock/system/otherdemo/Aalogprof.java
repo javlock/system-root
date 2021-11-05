@@ -11,8 +11,8 @@ import java.util.concurrent.CopyOnWriteArrayList;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.github.javlock.system.installer.utils.ExecutorMaster;
-import com.github.javlock.system.installer.utils.ExecutorMasterOutputListener;
+import com.github.javlock.system.apiutils.ExecutorMaster;
+import com.github.javlock.system.apiutils.ExecutorMasterOutputListener;
 
 public class Aalogprof extends Thread {
 	public static final Logger LOGGER = LoggerFactory.getLogger("Aalogprof");

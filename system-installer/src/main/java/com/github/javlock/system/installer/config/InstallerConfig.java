@@ -24,6 +24,7 @@ public class InstallerConfig {
 			ALPHA_CAPS + ALPHA + SPECIAL_CHARS);
 
 	private @Getter @Setter VERSIONTYPE version = VERSIONTYPE.MAIN;
+	private @Getter @Setter boolean prepare;
 
 	private int gen(int min, int max) {
 		return min + (int) (Math.random() * ((max - min) + 1));
