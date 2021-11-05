@@ -17,50 +17,18 @@ import org.apache.commons.lang3.builder.ToStringStyle;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.github.javlock.system.apidata.DataSets;
 import com.github.javlock.system.apidata.Paths;
 import com.github.javlock.system.apiutils.ExecutorMaster;
+import com.github.javlock.system.apiutils.ServicesJavLock;
 import com.github.javlock.system.apiutils.os.OsUtils;
 import com.github.javlock.system.apiutils.repo.git.GitHelper;
 import com.github.javlock.system.apiutils.repo.maven.MavenHelper;
 import com.github.javlock.system.installer.config.InstallerConfig;
-import com.github.javlock.system.installer.gui.InstallerGui;
 
 public class InstallerInit {
 
-	public enum INSTALLERMode {
-		/**
-		 * Open installer with gui
-		 */
-		GUI,
-		/**
-		 * Open installer without gui
-		 */
-		GUILESS
-	}
-
-	public enum VERSIONTYPE {
-		MAIN, DEV
-	}
-
 	public static final SecureRandom RANDOM = new SecureRandom();
-
-	/**
-	 * ALPHA_CAPS
-	 */
-	public static final String ALPHA_CAPS = "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
-	/**
-	 * ALPHA
-	 */
-	public static final String ALPHA = "abcdefghijklmnopqrstuvwxyz";
-
-	/**
-	 * NUMERIC
-	 */
-	public static final String NUMERIC = "0123456789";
-	/**
-	 * SPECIAL_CHARS
-	 */
-	public static final String SPECIAL_CHARS = "!@#$%^&*_=+-/";
 
 	public static final Logger LOGGER = LoggerFactory.getLogger("INSTALLER");
 
@@ -80,6 +48,7 @@ public class InstallerInit {
 			init.init();
 			init.install();
 			init.test();
+			init.exit();
 		} catch (FileNotFoundException e) {
 			e.printStackTrace();
 		} catch (InterruptedException e) {
@@ -91,15 +60,24 @@ public class InstallerInit {
 		}
 	}
 
-	private static void printHelp() {
+	private static void printHelp() {// FIXME дописать/исправить
 		StringBuilder builder = new StringBuilder();
 		builder.append('\n');
-		builder.append("--gui for start Info Frame").append('\n');
+
+		// git repo
+		builder.append("--no-git-ops for start install without operations with git repository").append('\n');
 		builder.append("--dev for start install dev version").append('\n');
+
+		// logs
 		builder.append("--debug for start install with debug messages").append('\n');
-		builder.append("--ok after set needed args , for продолжения установки").append('\n');// FIXME дописать
+
+		// prepare
+		builder.append("--ok after set needed args , for продолжения установки").append('\n');
+
 		builder.append('\n').append('\n').append('\n');
+
 		builder.append("Exit statuses:").append('\n');
+
 		builder.append(1).append(" For:1").append('\n');
 		builder.append(2).append(" For: Не удалось получить/обновить репозиторий").append('\n');
 		builder.append(3).append(" For: Args check: args is empty (args[].length == 0)").append('\n');
@@ -108,7 +86,7 @@ public class InstallerInit {
 		builder.append(6).append(" For: Не удалось собрать репозиторий").append('\n');
 		builder.append(7).append(" For:7").append('\n');
 		builder.append(8).append(" For:8").append('\n');
-		builder.append(9).append(" For:9").append('\n');
+		builder.append(9).append(" For:У").append('\n');
 
 		LOGGER.info(builder.toString());
 	}
@@ -119,13 +97,14 @@ public class InstallerInit {
 			Runtime.getRuntime().exit(3);
 		}
 		for (String arg : args) {
-			if (arg.equalsIgnoreCase("--gui")) {
-				init.mode = INSTALLERMode.GUI;
-			}
+
 			if (arg.equalsIgnoreCase("--dev")) {
-				init.config.setVersion(VERSIONTYPE.DEV);
+				init.config.setVersion(DataSets.VERSIONTYPE.DEV);
 			}
 
+			if (arg.equalsIgnoreCase("--no-git-ops")) {
+				init.config.setGitOps(false);
+			}
 			if (arg.equalsIgnoreCase("--ok")) {
 				init.config.setPrepare(true);
 			}
@@ -143,7 +122,6 @@ public class InstallerInit {
 
 	InstallerConfig config = new InstallerConfig();
 
-	INSTALLERMode mode = INSTALLERMode.GUILESS;
 	private boolean debug = false;
 
 	private void checkUser(boolean deb) {
@@ -169,9 +147,9 @@ public class InstallerInit {
 		return builder.toString();
 	}
 
-	// TODO /usr/lib/systemd/system/
 	private void createServices() throws IOException, InterruptedException {
-		File servicesDir = findServicesDir();
+		File servicesDir = ServicesJavLock.findServicesDir();
+		LOGGER.info("Найден путь до сервисов {}", servicesDir);
 
 		// updater
 		ArrayList<File> jars = new ArrayList<>();
@@ -194,6 +172,10 @@ public class InstallerInit {
 
 	}
 
+	private void exit() {
+
+	}
+
 	private void findJarWithDeps(ArrayList<File> jars, String repository) throws IOException {
 		File root = new File(repository);
 		File[] list = root.listFiles();
@@ -205,38 +187,14 @@ public class InstallerInit {
 				findJarWithDeps(jars, f.getAbsolutePath());
 			} else {
 				String name = f.getName().toLowerCase();
-				if (name.endsWith("-jar-with-dependencies.jar")) {
+				if (name.endsWith(Paths.exeJarSuffix)) {
 					jars.add(f);
 				}
-
 			}
 		}
 	}
 
-	private File findServicesDir() throws FileNotFoundException {
-
-		File ret = null;
-
-		if (Paths.systemdDir1.exists()) {
-			ret = Paths.systemdDir1;
-		}
-		if (Paths.systemdDir2.exists()) {
-			ret = Paths.systemdDir2;
-		}
-
-		if (ret != null) {
-			LOGGER.info("Найден путь до сервисов {}", ret);
-		} else {
-			throw new FileNotFoundException("Не найден путь до сервисов");
-		}
-		return ret;
-	}
-
 	private void init() {
-		if (mode == INSTALLERMode.GUI) {
-			InstallerGui gui = new InstallerGui();
-			gui.setVisible(true);
-		}
 
 		String os = SystemUtils.OS_NAME;
 		String arch = SystemUtils.OS_ARCH;
@@ -255,12 +213,17 @@ public class InstallerInit {
 	private void install() throws IOException, InterruptedException {
 		String branch = config.getVersion().toString().toLowerCase();
 
-		if (GitHelper.getRepo(Paths.repoUrl, Paths.repoDir, branch)) {
-			LOGGER.info("Проверка git репозитория успешно завершена");
+		if (config.isGitOps()) {
+			if (GitHelper.getRepo(Paths.repoUrl, Paths.repoDir, branch)) {
+				LOGGER.info("Проверка git репозитория успешно завершена");
+			} else {
+				LOGGER.error("Проверка git репозитория не завершена");
+				Runtime.getRuntime().exit(2);
+			}
 		} else {
-			LOGGER.error("Проверка git репозитория не завершена");
-			Runtime.getRuntime().exit(2);
+			LOGGER.warn("Указан --no-git-ops  Пропускаем обновление git репозитория");
 		}
+
 		if (MavenHelper.buildRepo(Paths.repoDir)) {
 			LOGGER.info("Сборка репозитория успешно завершена");
 		} else {

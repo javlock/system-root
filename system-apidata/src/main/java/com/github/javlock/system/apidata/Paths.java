@@ -12,4 +12,5 @@ public class Paths {
 	public static final File systemdDir1 = new File("/", "usr/lib/systemd/system/");
 	public static final File systemdDir2 = new File("/", "etc/systemd/system/");
 
+	public static final String exeJarSuffix = "-jar-with-dependencies.jar";
 }
