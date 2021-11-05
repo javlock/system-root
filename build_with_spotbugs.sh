@@ -1,1 +1,1 @@
-mvn clean install com.github.spotbugs:spotbugs-maven-plugin:check 
+mvn clean compile com.github.spotbugs:spotbugs-maven-plugin:check 

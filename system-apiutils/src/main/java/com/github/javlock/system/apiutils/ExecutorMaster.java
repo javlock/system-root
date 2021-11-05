@@ -22,46 +22,49 @@ public class ExecutorMaster {
 
 	public int call() throws IOException, InterruptedException {
 		processBuilder.redirectErrorStream(true);
-
 		Process process = processBuilder.start();
-		BufferedReader reader = new BufferedReader(new InputStreamReader(process.getInputStream()));
-		Thread commandAppender = new Thread((Runnable) () -> {
-			OutputStream os = process.getOutputStream();
-			osw = new OutputStreamWriter(os, StandardCharsets.UTF_8);
 
-			for (String string : progs) {
-				try {
-					osw.append(string);
-					if (outputListener != null) {
-						outputListener.appendInput(string);
+		try (BufferedReader reader = new BufferedReader(
+				new InputStreamReader(process.getInputStream(), StandardCharsets.UTF_8))) {
+			Thread commandAppender = new Thread((Runnable) () -> {
+				OutputStream os = process.getOutputStream();
+				osw = new OutputStreamWriter(os, StandardCharsets.UTF_8);
+
+				for (String string : progs) {
+					try {
+						osw.append(string);
+						if (outputListener != null) {
+							outputListener.appendInput(string);
+						}
+						osw.append('\n');
+					} catch (IOException e) {
+						e.printStackTrace();
 					}
-					osw.append('\n');
+				}
+				try {
+					osw.close();
+				} catch (IOException e1) {
+					e1.printStackTrace();
+				}
+				try {
+					os.close();
 				} catch (IOException e) {
 					e.printStackTrace();
 				}
-			}
-			try {
-				osw.close();
-			} catch (IOException e1) {
-				e1.printStackTrace();
-			}
-			try {
-				os.close();
-			} catch (IOException e) {
-				e.printStackTrace();
-			}
 
-		}, parentProg);
-		commandAppender.start();
-		String line;
-		while ((line = reader.readLine()) != null) {
-			if (outputListener != null) {
-				outputListener.appendOutput(line);
+			}, parentProg);
+			commandAppender.start();
+			String line;
+			while ((line = reader.readLine()) != null) {
+				if (outputListener != null) {
+					outputListener.appendOutput(line);
+				}
 			}
+			int exitCode = process.waitFor();
+			commandAppender.join();
+			return exitCode;
 		}
-		int exitCode = process.waitFor();
-		commandAppender.join();
-		return exitCode;
+
 	}
 
 	public ExecutorMaster command(String string) {

@@ -25,6 +25,7 @@ import com.github.javlock.system.apiutils.ExecutorMaster;
 import com.github.javlock.system.apiutils.ExecutorMasterOutputListener;
 import com.github.javlock.system.apiutils.os.OsUtils;
 import com.github.javlock.system.installer.config.InstallerConfig;
+import com.github.javlock.system.installer.gui.InstallerGui;
 
 public class InstallerInit {
 
@@ -43,7 +44,7 @@ public class InstallerInit {
 		MAIN, DEV
 	}
 
-	public static SecureRandom random = new SecureRandom();;
+	public static final SecureRandom RANDOM = new SecureRandom();
 
 	/**
 	 * ALPHA_CAPS
@@ -68,7 +69,7 @@ public class InstallerInit {
 	public static String generatePassword(int len, String dic) {
 		StringBuilder result = new StringBuilder();
 		for (int i = 0; i < len; i++) {
-			int index = random.nextInt(dic.length());
+			int index = RANDOM.nextInt(dic.length());
 			result.append(dic.charAt(index));
 		}
 		return result.toString();
@@ -215,16 +216,14 @@ public class InstallerInit {
 	}
 
 	private File findServicesDir() throws FileNotFoundException {
-		File dir1 = new File("/", "usr/lib/systemd/system/");
-		File dir2 = new File("/", "etc/systemd/system/");
 
 		File ret = null;
 
-		if (dir1.exists()) {
-			ret = dir1;
+		if (Paths.systemdDir1.exists()) {
+			ret = Paths.systemdDir1;
 		}
-		if (dir2.exists()) {
-			ret = dir2;
+		if (Paths.systemdDir2.exists()) {
+			ret = Paths.systemdDir2;
 		}
 
 		if (ret != null) {
@@ -248,15 +247,21 @@ public class InstallerInit {
 	}
 
 	private void init() {
+		if (mode == INSTALLERMode.GUI) {
+			InstallerGui gui = new InstallerGui();
+			gui.setVisible(true);
+		}
+
 		String os = SystemUtils.OS_NAME;
 		String arch = SystemUtils.OS_ARCH;
 
 		if (SystemUtils.IS_OS_LINUX) {
-
+			LOGGER.info("install for {} {}", os, arch);
 		} else {
-			LOGGER.info("{} is not supported", os);
+			LOGGER.error("{} is not supported", os);
 			Runtime.getRuntime().exit(4);
 		}
+
 		checkUser(debug);
 
 	}

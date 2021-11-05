@@ -26,8 +26,6 @@ public class Updater extends Thread {
 	public void run() {
 		int sec = 1000;
 		int minute = 60 * sec;
-
-		int sec10 = 10 * sec;
 		int min5 = 5 * minute;
 		do {
 			try {
@@ -41,7 +39,7 @@ public class Updater extends Thread {
 			}
 			long delay = 0;
 			try {
-				delay = sec10;
+				delay = min5;
 				Thread.sleep(delay);
 			} catch (InterruptedException e) {
 				LOGGER.error("sleep err with time:{}", delay, e);
