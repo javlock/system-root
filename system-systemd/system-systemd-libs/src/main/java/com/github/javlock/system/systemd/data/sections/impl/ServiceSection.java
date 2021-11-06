@@ -1,9 +1,8 @@
-package com.github.javlock.system.systemd.data.service.sections.impl;
+package com.github.javlock.system.systemd.data.sections.impl;
 
-import java.util.Objects;
 import java.util.concurrent.CopyOnWriteArrayList;
 
-import com.github.javlock.system.systemd.data.service.sections.Section;
+import com.github.javlock.system.systemd.data.sections.Section;
 
 import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import lombok.Getter;
@@ -13,7 +12,8 @@ import lombok.Setter;
 public class ServiceSection extends Section {
 
 	public enum CAPs {
-		CAP_SETUID, CAP_SETGID, CAP_NET_BIND_SERVICE, CAP_DAC_READ_SEARCH
+		CAP_SETUID, CAP_SETGID, CAP_NET_BIND_SERVICE, CAP_DAC_READ_SEARCH, CAP_SYS_ADMIN, CAP_MAC_ADMIN,
+		CAP_AUDIT_CONTROL, CAP_CHOWN, CAP_DAC_OVERRIDE, CAP_FOWNER, CAP_SYS_TTY_CONFIG, CAP_LINUX_IMMUTABLE
 	}
 
 	public enum KillSignalType {
@@ -25,16 +25,18 @@ public class ServiceSection extends Section {
 	}
 
 	public enum RestartType {
-		on_failure
+		on_failure, always
 	}
 
 	public enum ServiceSectionType {
-		notify
+		notify, forking
 	}
 
 	public enum YesNoType {
 		yes, no
 	}
+
+	private @Getter @Setter String pIDFile;
 
 	private @Getter @Setter ServiceSectionType type;
 
@@ -67,47 +69,11 @@ public class ServiceSection extends Section {
 	private @Getter @Setter YesNoType noNewPrivileges;
 	private @Getter CopyOnWriteArrayList<CAPs> capabilityBoundingSet = new CopyOnWriteArrayList<>();
 
-	@Override
-	public boolean equals(Object obj) {
-		if (this == obj) {
-			return true;
-		}
-		if (!super.equals(obj)) {
-			return false;
-		}
-		if (getClass() != obj.getClass()) {
-			return false;
-		}
-		ServiceSection other = (ServiceSection) obj;
-		return Objects.equals(capabilityBoundingSet, other.capabilityBoundingSet)
-				&& Objects.equals(execReload, other.execReload) && Objects.equals(execStart, other.execStart)
-				&& Objects.equals(execStartPost, other.execStartPost)
-				&& Objects.equals(execStartPre, other.execStartPre) && Objects.equals(execStop, other.execStop)
-				&& Objects.equals(execStopPost, other.execStopPost) && killSignal == other.killSignal
-				&& Objects.equals(limitNOFILE, other.limitNOFILE) && noNewPrivileges == other.noNewPrivileges
-				&& notifyAccess == other.notifyAccess && privateDevices == other.privateDevices
-				&& privateTmp == other.privateTmp && protectHome == other.protectHome
-				&& Objects.equals(protectSystem, other.protectSystem)
-				&& Objects.equals(readOnlyDirectories, other.readOnlyDirectories)
-				&& Objects.equals(readWriteDirectories, other.readWriteDirectories) && restartType == other.restartType
-				&& Objects.equals(timeoutSec, other.timeoutSec) && type == other.type
-				&& Objects.equals(watchdogSec, other.watchdogSec);
-	}
+	private @Getter @Setter Long OOMScoreAdjust;
 
 	@Override
 	public SECTIONNAME getName() {
 		return SECTIONNAME.Service;
-	}
-
-	@Override
-	public int hashCode() {
-		final int prime = 31;
-		int result = super.hashCode();
-		result = prime * result + Objects.hash(capabilityBoundingSet, execReload, execStart, execStartPost,
-				execStartPre, execStop, execStopPost, killSignal, limitNOFILE, noNewPrivileges, notifyAccess,
-				privateDevices, privateTmp, protectHome, protectSystem, readOnlyDirectories, readWriteDirectories,
-				restartType, timeoutSec, type, watchdogSec);
-		return result;
 	}
 
 	@Override
@@ -192,6 +158,12 @@ public class ServiceSection extends Section {
 			for (CAPs capability : capabilityBoundingSet) {
 				builder.append(capability).append(" ");
 			}
+		}
+		if (pIDFile != null) {
+			builder.append("PIDFile=").append(pIDFile).append('\n');
+		}
+		if (OOMScoreAdjust != null) {
+			builder.append("OOMScoreAdjust=").append(OOMScoreAdjust).append('\n');
 		}
 
 		return builder.toString();

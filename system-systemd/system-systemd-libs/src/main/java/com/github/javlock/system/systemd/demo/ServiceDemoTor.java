@@ -7,16 +7,16 @@ import org.slf4j.LoggerFactory;
 
 import com.github.javlock.system.apidata.exceptions.AlreadyExistsException;
 import com.github.javlock.system.systemd.data.SystemdElement;
+import com.github.javlock.system.systemd.data.sections.impl.InstallSection;
+import com.github.javlock.system.systemd.data.sections.impl.ServiceSection;
+import com.github.javlock.system.systemd.data.sections.impl.ServiceSection.CAPs;
+import com.github.javlock.system.systemd.data.sections.impl.ServiceSection.KillSignalType;
+import com.github.javlock.system.systemd.data.sections.impl.ServiceSection.NotifyAccessType;
+import com.github.javlock.system.systemd.data.sections.impl.ServiceSection.RestartType;
+import com.github.javlock.system.systemd.data.sections.impl.ServiceSection.ServiceSectionType;
+import com.github.javlock.system.systemd.data.sections.impl.ServiceSection.YesNoType;
+import com.github.javlock.system.systemd.data.sections.impl.UnitSection;
 import com.github.javlock.system.systemd.data.service.Service;
-import com.github.javlock.system.systemd.data.service.sections.impl.InstallSection;
-import com.github.javlock.system.systemd.data.service.sections.impl.ServiceSection;
-import com.github.javlock.system.systemd.data.service.sections.impl.ServiceSection.CAPs;
-import com.github.javlock.system.systemd.data.service.sections.impl.ServiceSection.KillSignalType;
-import com.github.javlock.system.systemd.data.service.sections.impl.ServiceSection.NotifyAccessType;
-import com.github.javlock.system.systemd.data.service.sections.impl.ServiceSection.RestartType;
-import com.github.javlock.system.systemd.data.service.sections.impl.ServiceSection.ServiceSectionType;
-import com.github.javlock.system.systemd.data.service.sections.impl.ServiceSection.YesNoType;
-import com.github.javlock.system.systemd.data.service.sections.impl.UnitSection;
 
 public class ServiceDemoTor {
 	private static final Logger LOGGER = LoggerFactory.getLogger("ServiceDemo");
