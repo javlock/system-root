@@ -38,7 +38,7 @@ public class Aalogprof extends Thread {
 
 							@Override
 							public void appendOutput(String line) {
-								System.out.println(line);
+								LOGGER.info(line);
 								try {
 									res.parseLine(line);
 								} catch (Exception e) {
@@ -97,7 +97,7 @@ public class Aalogprof extends Thread {
 					}
 				});
 				int exitStatusReloader = reloader.call();
-				System.err.println(res);
+				LOGGER.info("{}", res);
 
 				res.clear();
 			} catch (IOException e) {

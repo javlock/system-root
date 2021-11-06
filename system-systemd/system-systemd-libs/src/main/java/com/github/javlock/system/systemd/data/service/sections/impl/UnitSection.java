@@ -2,6 +2,7 @@ package com.github.javlock.system.systemd.data.service.sections.impl;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 
 import com.github.javlock.system.apidata.exceptions.AlreadyExistsException;
 import com.github.javlock.system.systemd.data.SystemdElement;
@@ -11,15 +12,16 @@ import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import lombok.Getter;
 import lombok.Setter;
 
-//TODO Override the "equals" method in this class.
 @SuppressFBWarnings(value = { "EI_EXPOSE_REP", "EI_EXPOSE_REP2" })
 public class UnitSection extends Section {
 
 	private @Getter @Setter String description;
+
 	private List<SystemdElement> after = new ArrayList<>();
 
 	private @Getter @Setter String documentation;
 	private @Getter @Setter SystemdElement requires;
+
 	private @Getter @Setter SystemdElement conflicts;
 
 	public void appendAfter(SystemdElement element) throws AlreadyExistsException {
@@ -31,8 +33,33 @@ public class UnitSection extends Section {
 	}
 
 	@Override
+	public boolean equals(Object obj) {
+		if (this == obj) {
+			return true;
+		}
+		if (!super.equals(obj)) {
+			return false;
+		}
+		if (getClass() != obj.getClass()) {
+			return false;
+		}
+		UnitSection other = (UnitSection) obj;
+		return Objects.equals(after, other.after) && Objects.equals(conflicts, other.conflicts)
+				&& Objects.equals(description, other.description) && Objects.equals(documentation, other.documentation)
+				&& Objects.equals(requires, other.requires);
+	}
+
+	@Override
 	public SECTIONNAME getName() {
 		return SECTIONNAME.Unit;
+	}
+
+	@Override
+	public int hashCode() {
+		final int prime = 31;
+		int result = super.hashCode();
+		result = prime * result + Objects.hash(after, conflicts, description, documentation, requires);
+		return result;
 	}
 
 	private String printAfter() {
