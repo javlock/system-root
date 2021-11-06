@@ -1,10 +1,11 @@
-package com.github.javlock.system.systemd.service.sections;
+package com.github.javlock.system.systemd.data.service.sections;
 
-import com.github.javlock.system.systemd.SystemdElement;
+import com.github.javlock.system.systemd.data.SystemdElement;
 
 import lombok.Getter;
 import lombok.Setter;
 
+//TODO Override the "equals" method in this class.
 public class Section extends SystemdElement {
 
 	public enum SECTIONNAME {

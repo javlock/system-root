@@ -1,13 +1,17 @@
-package com.github.javlock.system.systemd.service.sections.impl;
+package com.github.javlock.system.systemd.data.service.sections.impl;
 
-import com.github.javlock.system.systemd.SystemdElement;
-import com.github.javlock.system.systemd.service.sections.Section;
+import com.github.javlock.system.systemd.data.SystemdElement;
+import com.github.javlock.system.systemd.data.service.sections.Section;
 
+import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import lombok.Getter;
 import lombok.Setter;
 
+//TODO Override the "equals" method in this class.
+@SuppressFBWarnings(value = "EI_EXPOSE_REP")
 public class InstallSection extends Section {
 
+	@SuppressFBWarnings(value = "EI_EXPOSE_REP2")
 	private @Getter @Setter SystemdElement wantedBy;
 
 	@Override

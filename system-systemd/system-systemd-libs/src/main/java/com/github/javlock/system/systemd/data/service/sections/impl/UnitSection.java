@@ -1,23 +1,34 @@
-package com.github.javlock.system.systemd.service.sections.impl;
+package com.github.javlock.system.systemd.data.service.sections.impl;
 
 import java.util.ArrayList;
 import java.util.List;
 
-import com.github.javlock.system.systemd.SystemdElement;
-import com.github.javlock.system.systemd.service.sections.Section;
+import com.github.javlock.system.apidata.exceptions.AlreadyExistsException;
+import com.github.javlock.system.systemd.data.SystemdElement;
+import com.github.javlock.system.systemd.data.service.sections.Section;
 
 import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import lombok.Getter;
 import lombok.Setter;
 
+//TODO Override the "equals" method in this class.
 @SuppressFBWarnings(value = { "EI_EXPOSE_REP", "EI_EXPOSE_REP2" })
 public class UnitSection extends Section {
+
 	private @Getter @Setter String description;
+	private List<SystemdElement> after = new ArrayList<>();
+
 	private @Getter @Setter String documentation;
 	private @Getter @Setter SystemdElement requires;
 	private @Getter @Setter SystemdElement conflicts;
 
-	private @Getter List<SystemdElement> after = new ArrayList<>();
+	public void appendAfter(SystemdElement element) throws AlreadyExistsException {
+		if (!after.contains(element)) {
+			after.add(element);
+		} else {
+			throw new AlreadyExistsException(String.format("after contains %s", element));
+		}
+	}
 
 	@Override
 	public SECTIONNAME getName() {
