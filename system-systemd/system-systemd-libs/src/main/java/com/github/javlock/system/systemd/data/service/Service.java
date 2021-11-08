@@ -10,9 +10,15 @@ public class Service extends SystemdElement {
 	@Override
 	public String toServiceFile() {
 		StringBuilder result = new StringBuilder();
-		result.append(getUnitSection().toServiceFile()).append('\n');
-		result.append(getServiceSection().toServiceFile()).append('\n');
-		result.append(getInstallSection().toServiceFile()).append('\n');
+		if (getUnitSection() != null) {
+			result.append(getUnitSection().toServiceFile()).append('\n');
+		}
+		if (getServiceSection() != null) {
+			result.append(getServiceSection().toServiceFile()).append('\n');
+		}
+		if (getInstallSection() != null) {
+			result.append(getInstallSection().toServiceFile()).append('\n');
+		}
 		return result.toString();
 	}
 

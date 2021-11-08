@@ -1,4 +1,6 @@
-package com.github.javlock.system.systemd.data.sections;
+package com.github.javlock.system.systemd.data.sections.impl;
+
+import com.github.javlock.system.systemd.data.sections.Section;
 
 public class AUTOMOUNTSection extends Section {
 	@Override

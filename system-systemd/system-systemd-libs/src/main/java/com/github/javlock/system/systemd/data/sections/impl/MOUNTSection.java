@@ -1,4 +1,4 @@
-package com.github.javlock.system.systemd.data;
+package com.github.javlock.system.systemd.data.sections.impl;
 
 import com.github.javlock.system.systemd.data.sections.Section;
 

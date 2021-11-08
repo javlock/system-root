@@ -17,27 +17,33 @@ public class DemoServiceParse {
 		void appendFile(File file) throws Exception;
 	}
 
+	interface FindFileListner {
+
+		boolean checkFile(String what, File where);
+
+		File findInDir(String what, File where);
+	}
+
 	static boolean withCatch = true;
 	static DemoServiceParseListener listener = new DemoServiceParseListener() {
 
 		@Override
 		public void appendDir(File dir) throws Exception {
-			for (File file : dir.listFiles()) {
+			if (dir == null) {
+				throw new IllegalArgumentException("Проверть входные данные (каталог)");
+			}
+			File[] files = dir.listFiles();
+			if (files == null) {
+				throw new IllegalArgumentException(String.format("Ваш каталог %s пуст ", dir));
+			}
+
+			for (File file : files) {
 				if (file.isFile()) {
 					if (withCatch) {
 						try {
 							listener.appendFile(file);
 						} catch (Exception e) {
 							e.printStackTrace();
-
-							if (e.getCause() == null) {
-								LOGGER.error("", e);
-							} else {
-								String causeMsg = e.getCause().getMessage();
-								if (causeMsg.contains("enum")) {
-									LOGGER.error(causeMsg);
-								}
-							}
 						}
 					} else {
 						listener.appendFile(file);
@@ -46,31 +52,72 @@ public class DemoServiceParse {
 					listener.appendDir(file);
 				}
 			}
-
 		}
 
 		@Override
 		public void appendFile(File file) throws Exception {
-			SystemdElement element2 = ServiceUtils.parseFile(file);
-			// LoggerFactory.getLogger("DemoServiceParse:parseFile").info("\n{}",
-			// element2.toServiceFile());
+			elements.add(ServiceUtils.parseFile(file));
 		}
 
 	};
 
+	static CopyOnWriteArrayList<SystemdElement> elements = new CopyOnWriteArrayList<>();
 	private static final Logger LOGGER = LoggerFactory.getLogger("DemoServiceParse");
-	public static CopyOnWriteArrayList<String> errorMessages = new CopyOnWriteArrayList<>();
+
+	static FindFileListner findFileListner = new FindFileListner() {
+
+		@Override
+		public boolean checkFile(String what, File where) {
+			return where.getName().equalsIgnoreCase(what);
+		}
+
+		@Override
+		public File findInDir(String what, File where) {
+			if (where.isFile() && checkFile(what, where)) {
+				return where;
+			}
+			if (where.isDirectory()) {
+				File[] list = where.listFiles();
+				if (list != null) {
+					for (File file : list) {
+						File test = findInDir(what, file);
+						if (test != null) {
+							return test;
+						}
+					}
+				}
+			}
+			return null;
+		}
+
+	};
+
+	private static File find(String what, File where) {
+		return findFileListner.findInDir(what, where);
+	}
 
 	public static void main(String[] args) {
 		try {
 			File serviceDir = ServicesJavLock.findServicesDir();
 
-			listener.appendDir(serviceDir);
+			boolean fullParseOrTor = true;
+			if (fullParseOrTor) {
+				listener.appendDir(serviceDir);
+			} else {
+				File torServiceFile = new File("/etc/systemd/system/multi-user.target.wants/tor.service");
 
-			LOGGER.info("--------------------------------------------------------------");
-			for (String string : errorMessages) {
-				LOGGER.info("errorMessages:{} {}", errorMessages.size(), string);
+				LOGGER.info("{}", torServiceFile);
+				listener.appendFile(torServiceFile);
 			}
+
+			boolean deb = false;
+			if (deb) {
+				for (SystemdElement element : elements) {
+					LOGGER.info("-------------------------{}-------------------------------", element.getFileName());
+					LOGGER.info("{} \n{}", element.getClass(), element.toServiceFile());
+				}
+			}
+
 		} catch (Exception e) {
 			e.printStackTrace();
 		}

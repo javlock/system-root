@@ -2,16 +2,12 @@ package com.github.javlock.system.systemd.utils;
 
 import java.io.File;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
+import com.github.javlock.system.apidata.exceptions.ObjectTypeException;
 import com.github.javlock.system.systemd.data.SystemdElement;
 import com.github.javlock.system.systemd.data.SystemdElement.ELEMENTTYPE;
 
 public class ServiceUtils {
-	private static final Logger LOGGER = LoggerFactory.getLogger("ServiceUtils");
-
-	public static ELEMENTTYPE getElementType(String name) throws IllegalArgumentException {
+	public static ELEMENTTYPE getElementType(String name) throws IllegalArgumentException, ObjectTypeException {
 		if (name.isEmpty()) {
 			throw new IllegalArgumentException("You fileName.isEmpty");
 		}
@@ -22,9 +18,9 @@ public class ServiceUtils {
 			elementType = ELEMENTTYPE.valueOf(type.toUpperCase().trim());
 		}
 		if (elementType == null) {
-			String msg = String.format("Не получен elementType для файла с именем %s", name);
-			LOGGER.error(msg);
-			throw new IllegalArgumentException(msg);
+			String msg = String.format("Не получен elementType для файла (ошибка в расширении файла) с именем %s",
+					name);
+			throw new ObjectTypeException(msg);
 		}
 		return elementType;
 	}

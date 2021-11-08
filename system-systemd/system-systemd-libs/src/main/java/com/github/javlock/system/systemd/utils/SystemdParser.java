@@ -1,8 +1,10 @@
 package com.github.javlock.system.systemd.utils;
 
 import java.io.File;
+import java.lang.reflect.Method;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
@@ -10,6 +12,7 @@ import java.util.Optional;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.github.javlock.system.apidata.systemd.data.SystDKeyMeta;
 import com.github.javlock.system.systemd.NotParsedException;
 import com.github.javlock.system.systemd.data.SystemdElement;
 import com.github.javlock.system.systemd.data.SystemdElement.CAPs;
@@ -40,12 +43,14 @@ import com.github.javlock.system.systemd.data.service.Service;
 import com.github.javlock.system.systemd.data.socket.SOCKET;
 import com.github.javlock.system.systemd.data.target.Target;
 import com.github.javlock.system.systemd.data.timer.Timer;
-import com.github.javlock.system.systemd.demo.DemoServiceParse;
 import com.github.javlock.system.systemd.utils.slice.SLICE;
 
+import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
+
+@SuppressFBWarnings(value = "EI_EXPOSE_REP")
 public class SystemdParser {
 	public static interface SystemdParserListener {
-		void errorStream(String msg);
+		void errorStream(String msg) throws Exception;
 
 		void input(String input) throws Exception;
 
@@ -56,26 +61,14 @@ public class SystemdParser {
 
 	private static final Logger LOGGER = LoggerFactory.getLogger("SystemdParser");
 
-	boolean logToDo;
-
 	SECTIONNAME currentSectionName;
 
 	SystemdParserListener listener = new SystemdParserListener() {
 
 		@Override
-		public void errorStream(String msg) {
+		public void errorStream(String msg) throws Exception {
 			System.out.println("SystemdParser.errorStream()");
-			try {
-				if (!DemoServiceParse.errorMessages.contains(msg)) {
-					DemoServiceParse.errorMessages.add(msg);
-				}
-				throw new Exception(msg);
-			} catch (Exception e) {
-				LOGGER.info("{}", msg, e);
-				if (!DemoServiceParse.errorMessages.contains(msg)) {
-					DemoServiceParse.errorMessages.add(msg);
-				}
-			}
+			throw new Exception(msg);
 		}
 
 		@Override
@@ -142,7 +135,7 @@ public class SystemdParser {
 			throws NullPointerException, IllegalArgumentException {
 		if (key == null) {
 			LOGGER.error("CHECK=checkWithSection key==null For sectionName:[{}] with VALUE:[{}] for File:[{}]", section,
-					key, file);
+					value, file);
 			return false;
 		}
 		if (key.isEmpty()) {
@@ -165,7 +158,7 @@ public class SystemdParser {
 	protected boolean checkWithSectionName(File file, SECTIONNAME sectionName, String key, String value) {
 		if (key == null) {
 			LOGGER.error("CHECK=checkWithSectionName key==null For sectionName:[{}] with VALUE:[{}] for File:[{}]",
-					sectionName, key, file);
+					sectionName, value, file);
 			return false;
 		}
 		if (key.isEmpty()) {
@@ -184,9 +177,11 @@ public class SystemdParser {
 		return true;
 	}
 
-	public SystemdParser file(File serviceFile) {
+	public SystemdParser file(File serviceFile) throws Exception {
 		this.currentFile = serviceFile;
-		fileName(currentFile.getName());
+		String name = currentFile.getName();
+		fileName(name);
+		element.fileName(name);
 		return this;
 	}
 
@@ -198,8 +193,9 @@ public class SystemdParser {
 	 *           "com.github.javlock.system.systemd.data.SystemdElement.getUnitSection()"
 	 *           because "element" is null
 	 * @return
+	 * @throws Exception
 	 */
-	public SystemdParser fileName(String name) {
+	public SystemdParser fileName(String name) throws Exception {
 		ELEMENTTYPE type = ServiceUtils.getElementType(name);
 
 		switch (type) {
@@ -271,6 +267,9 @@ public class SystemdParser {
 	}
 
 	protected void parseWithSection(Section section, String key, String value) throws Exception {
+		String realKey = SystDKeyMeta.findKeyInClass(key);
+		setObjValueViaReflection(section, realKey, value);
+
 		if (key.equalsIgnoreCase("Description")) {
 			section.setDescription(value);
 			return;
@@ -302,7 +301,7 @@ public class SystemdParser {
 			section.setPIDFile(value);
 			return;
 		}
-		if (key.equalsIgnoreCase("WantedBy")) {
+		if (key.equalsIgnoreCase(SystDKeyMeta.WANTEDBY)) {
 			String[] valueArr = value.split(" ");
 			for (String fileName : valueArr) {
 				section.getWantedBy().add(new SystemdElement().fileName(fileName));
@@ -1381,6 +1380,43 @@ public class SystemdParser {
 			throw new IllegalArgumentException(value);
 		}
 		return ret;
+	}
+
+	private void setObjValueViaReflection(Section section, String realKey, String value) {
+		Class<? extends Section> customSectionClass = section.getClass(); // custom Section
+		String realKeyUpperCase = realKey.toUpperCase();
+
+		Class<Section> sectionClass = Section.class; // Section
+		Class<SystemdElement> systemdElementClass = SystemdElement.class; // SystemdElement
+
+		Method[] systemdElementClassMethods = systemdElementClass.getDeclaredMethods();
+		ArrayList<Method> getters = new ArrayList<>();
+		ArrayList<Method> setters = new ArrayList<>();
+
+		for (Method method : systemdElementClassMethods) {
+			String methodName = method.getName();
+			String methodNameUpperCase = methodName.toUpperCase();
+
+			boolean checkGetter = methodNameUpperCase.equals("get".toUpperCase() + realKeyUpperCase);
+			boolean checkSetter = methodNameUpperCase.equals("set".toUpperCase() + realKeyUpperCase);
+			if (checkGetter) {
+				getters.add(method);
+			} else if (checkSetter) {
+				setters.add(method);
+			} else {
+				System.err.println(methodName);
+			}
+
+			// System.err.println();
+		}
+		for (Method method : getters) {
+			System.err.println("GETTER: " + method.getName());
+		}
+		for (Method method : setters) {
+			System.err.println("SETTER: " + method.getName());
+		}
+
+		Runtime.getRuntime().exit(0);
 	}
 
 }

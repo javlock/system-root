@@ -9,20 +9,18 @@ import com.github.javlock.system.systemd.data.sections.impl.ServiceSection;
 import com.github.javlock.system.systemd.data.sections.impl.UnitSection;
 import com.github.javlock.system.systemd.data.service.Service;
 
-public class ServiceDemoTor {
+public class ServiceDemoKernel {
 	private static final Logger LOGGER = LoggerFactory.getLogger("ServiceDemo");
 
-	@SuppressWarnings("deprecation")
 	public static void main(String[] args) {
 		try {
-			Service torService = new Service();
+			Service kernelService = new Service();
 
-			UnitSection unitSection = torService.getUnitSection();
-			ServiceSection serviceSection = torService.getServiceSection();
-			InstallSection installSection = torService.getInstallSection();
+			UnitSection unitSection = kernelService.getOrCreateUnitSection();
+			ServiceSection serviceSection = kernelService.getServiceSection();
+			InstallSection installSection = kernelService.getInstallSection();
 
 			// UNIT
-
 			unitSection.appendAfter(new SystemdElement().fileName("syslog.target"));
 			unitSection.appendAfter(new SystemdElement().fileName("network.target"));
 			unitSection.appendAfter(new SystemdElement().fileName("nss-lookup.target"));
@@ -30,7 +28,7 @@ public class ServiceDemoTor {
 			// SERVICE
 			// INSTALL
 
-			LOGGER.info("\n{}", torService.toServiceFile());
+			LOGGER.info("\n{}", kernelService.toServiceFile());
 		} catch (Exception e) {
 			e.printStackTrace();
 		}

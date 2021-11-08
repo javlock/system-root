@@ -12,11 +12,4 @@ public class InstallSection extends Section {
 		return SECTIONNAME.Install;
 	}
 
-	@Override
-	public String toServiceFile() {
-		StringBuilder builder = new StringBuilder();
-		builder.append(retName()).append('\n');
-
-		return builder.toString();
-	}
 }
