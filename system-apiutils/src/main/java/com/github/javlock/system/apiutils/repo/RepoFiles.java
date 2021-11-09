@@ -38,7 +38,9 @@ public class RepoFiles {
 		RepoFiles.findJarWithDeps(jars, Paths.repoDir.getAbsolutePath());
 		File newDir = Paths.repoDirJars;
 		if (!newDir.exists()) {
-			newDir.mkdirs();
+			if (newDir.mkdirs()) {
+				LOGGER.info("Создан каталог {}", newDir);
+			}
 		}
 
 		String updaterPREF = "system-updater";
