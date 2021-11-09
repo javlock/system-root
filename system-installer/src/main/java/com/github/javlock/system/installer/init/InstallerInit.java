@@ -1,7 +1,6 @@
 package com.github.javlock.system.installer.init;
 
 import java.io.File;
-import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
@@ -14,6 +13,7 @@ import javax.naming.ConfigurationException;
 import org.apache.commons.lang3.SystemUtils;
 import org.apache.commons.lang3.builder.ToStringBuilder;
 import org.apache.commons.lang3.builder.ToStringStyle;
+import org.eclipse.jgit.api.errors.GitAPIException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -23,6 +23,7 @@ import com.github.javlock.system.apidata.systemd.data.ServicesDemoManual;
 import com.github.javlock.system.apiutils.ExecutorMaster;
 import com.github.javlock.system.apiutils.ServicesJavLock;
 import com.github.javlock.system.apiutils.os.OsUtils;
+import com.github.javlock.system.apiutils.repo.RepoFiles;
 import com.github.javlock.system.apiutils.repo.git.GitHelper;
 import com.github.javlock.system.apiutils.repo.maven.MavenHelper;
 import com.github.javlock.system.installer.config.InstallerConfig;
@@ -50,13 +51,7 @@ public class InstallerInit {
 			init.install();
 			init.test();
 			init.exit();
-		} catch (FileNotFoundException e) {
-			e.printStackTrace();
-		} catch (InterruptedException e) {
-			e.printStackTrace();
-		} catch (IOException e) {
-			e.printStackTrace();
-		} catch (ConfigurationException e) {
+		} catch (InterruptedException | IOException | ConfigurationException | GitAPIException e) {
 			e.printStackTrace();
 		}
 	}
@@ -154,7 +149,7 @@ public class InstallerInit {
 
 		// updater
 		ArrayList<File> jars = new ArrayList<>();
-		findJarWithDeps(jars, Paths.repoDir.getAbsolutePath());
+		RepoFiles.findJarWithDeps(jars, Paths.repoDir.getAbsolutePath());
 		for (File file : jars) {
 			LOGGER.info("JARRRS:{}", file);
 		}
@@ -173,40 +168,10 @@ public class InstallerInit {
 		new ExecutorMaster().parrentCommand(shell).dir(Paths.repoDir).command(cmd1).call();
 		new ExecutorMaster().parrentCommand(shell).dir(Paths.repoDir).command(cmd2).call();
 		new ExecutorMaster().parrentCommand(shell).dir(Paths.repoDir).command(cmd3).call();
-
-		// install
-		// new
-		// ExecutorMaster().parrentCommand(shell).dir(Paths.repoDir).command("systemctl
-		// daemon-reload").call();
-		// new
-		// ExecutorMaster().parrentCommand(shell).dir(Paths.repoDir).command("systemctl
-		// daemon-reload").call();
-		// new
-		// ExecutorMaster().parrentCommand(shell).dir(Paths.repoDir).command("systemctl
-		// daemon-reload").call();
-
 	}
 
 	private void exit() {
 
-	}
-
-	private void findJarWithDeps(ArrayList<File> jars, String repository) throws IOException {
-		File root = new File(repository);
-		File[] list = root.listFiles();
-		if (list == null) {
-			return;
-		}
-		for (File f : list) {
-			if (f.isDirectory()) {
-				findJarWithDeps(jars, f.getAbsolutePath());
-			} else {
-				String name = f.getName().toLowerCase();
-				if (name.endsWith(Paths.exeJarSuffix)) {
-					jars.add(f);
-				}
-			}
-		}
 	}
 
 	private void init() {
@@ -225,7 +190,7 @@ public class InstallerInit {
 
 	}
 
-	private void install() throws IOException, InterruptedException {
+	private void install() throws IOException, InterruptedException, GitAPIException {
 		String branch = config.getVersion().toString().toLowerCase();
 
 		if (config.isGitOps()) {
@@ -235,6 +200,7 @@ public class InstallerInit {
 				LOGGER.error("Проверка git репозитория не завершена");
 				Runtime.getRuntime().exit(2);
 			}
+			GitHelper.updateRepo();
 		} else {
 			LOGGER.warn("Указан --no-git-ops  Пропускаем обновление git репозитория");
 		}
