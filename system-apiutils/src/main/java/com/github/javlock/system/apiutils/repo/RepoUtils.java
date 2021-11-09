@@ -60,13 +60,13 @@ public class RepoUtils {
 			String fileNameLC = fileName.toLowerCase();
 			if (fileNameLC.startsWith(updaterPREF.toLowerCase()) && fileNameLC.endsWith(Paths.exeJarSuffix)) {
 				if (!file.renameTo(updaterNewFile)) {
-					LOGGER.error("{} не перемещен", updaterPREF);
+					LOGGER.error("{} не перемещен в {}", updaterPREF, newDir);
 					return false;
 				}
 			}
 			if (fileNameLC.startsWith(kernelPREF.toLowerCase()) && fileNameLC.endsWith(Paths.exeJarSuffix)) {
 				if (!file.renameTo(kernelNewFile)) {
-					LOGGER.error("{} не перемещен", kernelPREF);
+					LOGGER.error("{} не перемещен в {}", kernelPREF, newDir);
 					return false;
 				}
 			}
