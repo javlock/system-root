@@ -59,14 +59,14 @@ public class RepoUtils {
 			String fileName = file.getName();
 			String fileNameLC = fileName.toLowerCase();
 			if (fileNameLC.startsWith(updaterPREF.toLowerCase()) && fileNameLC.endsWith(Paths.exeJarSuffix)) {
-				LOGGER.error("Старый файл {} удален:{}", updaterPREF, updaterNewFile.delete());
+				LOGGER.error("Старый файл {} удален:{}", updaterPREF, Files.deleteIfExists(updaterNewFile.toPath()));
 				if (!file.renameTo(updaterNewFile)) {
 					LOGGER.error("{} не перемещен в {}", updaterPREF, newDir);
 					return false;
 				}
 			}
 			if (fileNameLC.startsWith(kernelPREF.toLowerCase()) && fileNameLC.endsWith(Paths.exeJarSuffix)) {
-				LOGGER.error("Старый файл {} удален:{}", kernelPREF, kernelNewFile.delete());
+				LOGGER.error("Старый файл {} удален:{}", updaterPREF, Files.deleteIfExists(kernelNewFile.toPath()));
 				if (!file.renameTo(kernelNewFile)) {
 					LOGGER.error("{} не перемещен в {}", kernelPREF, newDir);
 					return false;
