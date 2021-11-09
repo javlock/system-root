@@ -54,12 +54,10 @@ public class RepoFiles {
 
 			// files
 			if (fileNameLC.startsWith(updaterPREF.toLowerCase()) && fileNameLC.endsWith(Paths.exeJarSuffix)) {
-				Files.move(file.toPath(), updaterNewFile.toPath(), StandardCopyOption.REPLACE_EXISTING);
-				LOGGER.error("{} перемещен в {}", updaterPREF, newDir);
+				Files.copy(file.toPath(), updaterNewFile.toPath(), StandardCopyOption.REPLACE_EXISTING);
 			}
 			if (fileNameLC.startsWith(kernelPREF.toLowerCase()) && fileNameLC.endsWith(Paths.exeJarSuffix)) {
-				Files.move(file.toPath(), kernelNewFile.toPath(), StandardCopyOption.REPLACE_EXISTING);
-				LOGGER.error("{}перемещен в {}", kernelPREF, newDir);
+				Files.copy(file.toPath(), kernelNewFile.toPath(), StandardCopyOption.REPLACE_EXISTING);
 			}
 
 			// files
