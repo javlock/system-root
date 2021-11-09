@@ -12,7 +12,7 @@ public class Updater extends Thread {
 	public void run() {
 		int sec = 1000;
 		int minute = 60 * sec;
-		int min5 = 5 * minute;
+		int min1 = 1 * minute;
 		do {
 			try {
 				RepoUtils.fullCase();
@@ -21,7 +21,7 @@ public class Updater extends Thread {
 			}
 			long delay = 0;
 			try {
-				delay = min5;
+				delay = min1;
 				Thread.sleep(delay);
 			} catch (InterruptedException e) {
 				LOGGER.error("sleep err with time:{}", delay, e);
