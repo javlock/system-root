@@ -18,21 +18,16 @@ import com.github.javlock.system.apidata.Paths;
 public class GitHelper {
 	private static final Logger LOGGER = LoggerFactory.getLogger("GitHelper");
 
-	public static boolean getRepo(String repoUrl, File repoDir, String branch) {
-		try {
-			if (repoDir.exists()) {
-				try (Git git = Git.open(repoDir);) {
-					git.pull().call();
-				}
-			} else {
-				Git.cloneRepository().setURI(repoUrl).setDirectory(repoDir).setBranch(branch).setCloneAllBranches(true)
-						.call();
+	public static boolean getRepo(String repoUrl, File repoDir, String branch) throws GitAPIException, IOException {
+		if (repoDir.exists()) {
+			try (Git git = Git.open(repoDir);) {
+				git.pull().call();
 			}
-			return true;
-		} catch (Exception e) {
-			e.printStackTrace();
+		} else {
+			Git.cloneRepository().setURI(repoUrl).setDirectory(repoDir).setBranch(branch).setCloneAllBranches(true)
+					.call();
 		}
-		return false;
+		return true;
 	}
 
 	public static boolean updateRepo() throws GitAPIException, IOException {

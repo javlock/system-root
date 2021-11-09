@@ -4,8 +4,8 @@ import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.StandardOpenOption;
-import java.util.ArrayList;
 
+import org.eclipse.jgit.api.errors.GitAPIException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -14,73 +14,47 @@ import com.github.javlock.system.apidata.systemd.data.ServicesDemoManual;
 import com.github.javlock.system.apiutils.ExecutorMaster;
 import com.github.javlock.system.apiutils.ServicesJavLock;
 import com.github.javlock.system.apiutils.os.OsUtils;
+import com.github.javlock.system.apiutils.repo.git.GitHelper;
 import com.github.javlock.system.apiutils.repo.maven.MavenHelper;
 
 public class RepoUtils {
-
 	private static final Logger LOGGER = LoggerFactory.getLogger("RepoUtils");
 
-	private static boolean build() throws IOException, InterruptedException {
-		if (MavenHelper.buildRepo(Paths.repoDir)) {
-			LOGGER.info("Репозиторий {} собран", Paths.repoDir);
-			return true;
+	public static void fullCase() throws GitAPIException, IOException, InterruptedException {
+
+		// git
+		LOGGER.info("обновляем git репозиторий");
+		GitHelper.updateRepo();
+		LOGGER.info("репозиторий git обновлен");
+		// git
+
+		// maven
+		boolean builded = MavenHelper.buildRepo(Paths.repoDir);
+		if (builded) {
+			LOGGER.info("репозиторий собран");
 		}
-		return false;
-	}
+		// maven
 
-	public static void buildMoveUpdate() throws IOException, InterruptedException {
-		if (build()) {
-			if (movedExecsJarsToPersDir()) {
-				if (update()) {
-					restart();
-				}
-			}
-		}
+		// move files
+		LOGGER.info("Обновляем файл программы обновления");
+		RepoFiles.movedExecsJarsToPersDir();
+		// move files
 
-	}
+		// services
+		File servicesDir = ServicesJavLock.findServicesDir();
+		LOGGER.info("Найден путь до сервисов {}", servicesDir);
+		Files.writeString(new File(servicesDir, "javlock-system-updater.service").toPath(),
+				ServicesDemoManual.UPDATERSERVICEDATA, StandardOpenOption.TRUNCATE_EXISTING);
+		LOGGER.info("Записано");
+		// services
 
-	private static boolean movedExecsJarsToPersDir() throws IOException {
-		ArrayList<File> jars = new ArrayList<>();
-		RepoFiles.findJarWithDeps(jars, Paths.repoDir.getAbsolutePath());
-		File newDir = Paths.repoDirJars;
-		if (!newDir.exists()) {
-			newDir.mkdirs();
-		}
-
-		String updaterPREF = "system-updater";
-		File updaterNewFile = new File(newDir, updaterPREF + ".jar");
-
-		String kernelPREF = "system-updater";
-		File kernelNewFile = new File(newDir, kernelPREF + ".jar");
-
-		for (File file : jars) {
-			LOGGER.info("Найден исполняемый файл:{}", file);
-
-			String fileName = file.getName();
-			String fileNameLC = fileName.toLowerCase();
-			if (fileNameLC.startsWith(updaterPREF.toLowerCase()) && fileNameLC.endsWith(Paths.exeJarSuffix)) {
-				LOGGER.error("Старый файл {} удален:{}", updaterPREF, Files.deleteIfExists(updaterNewFile.toPath()));
-				if (!file.renameTo(updaterNewFile)) {
-					LOGGER.error("{} не перемещен в {}", updaterPREF, newDir);
-					return false;
-				}
-			}
-			if (fileNameLC.startsWith(kernelPREF.toLowerCase()) && fileNameLC.endsWith(Paths.exeJarSuffix)) {
-				LOGGER.error("Старый файл {} удален:{}", updaterPREF, Files.deleteIfExists(kernelNewFile.toPath()));
-				if (!file.renameTo(kernelNewFile)) {
-					LOGGER.error("{} не перемещен в {}", kernelPREF, newDir);
-					return false;
-				}
-			}
-		}
-		return true;
-	}
-
-	private static void restart() throws IOException, InterruptedException {
+		// shell
 		LOGGER.info("Получаем shell...");
 		String shell = OsUtils.getSystemShell();
 		LOGGER.info("shell получен:[{}]", shell);
+		// shell
 
+		// restart
 		LOGGER.info("перезапускаем в systemd...");
 		String cmd1 = "systemctl daemon-reload";
 		String cmd2 = "systemctl enable javlock-system-updater";
@@ -89,23 +63,10 @@ public class RepoUtils {
 		new ExecutorMaster().parrentCommand(shell).dir(Paths.repoDir).command(cmd2).call();
 		new ExecutorMaster().parrentCommand(shell).dir(Paths.repoDir).command(cmd3).call();
 		LOGGER.info("перезапустили");
-
+		// restart
 	}
 
-	private static boolean update() throws IOException, InterruptedException {
-		try {
-			LOGGER.info("Обновляем файл программы обновления");
-			File servicesDir = ServicesJavLock.findServicesDir();
-			LOGGER.info("Найден путь до сервисов {}", servicesDir);
-
-			Files.writeString(new File(servicesDir, "javlock-system-updater.service").toPath(),
-					ServicesDemoManual.UPDATERSERVICEDATA, StandardOpenOption.TRUNCATE_EXISTING);
-			LOGGER.info("Записано");
-		} catch (Exception e) {
-			LOGGER.error("Ошибка", e);
-			return false;
-		}
-		return true;
+	private RepoUtils() {
 	}
 
 }

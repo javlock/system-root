@@ -29,6 +29,10 @@ public class MavenHelper {
 			}
 		}).parrentCommand(shell).dir(repo).command(maven + " clean install && exit 0 ").call();
 
-		return statusMaven == 0;
+		boolean stat = statusMaven == 0;
+		if (stat) {
+			LOGGER.info("Репозиторий {} собран", repo);
+		}
+		return stat;
 	}
 }

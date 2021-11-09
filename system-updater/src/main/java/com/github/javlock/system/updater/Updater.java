@@ -4,7 +4,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.github.javlock.system.apiutils.repo.RepoUtils;
-import com.github.javlock.system.apiutils.repo.git.GitHelper;
 
 public class Updater extends Thread {
 	private static final Logger LOGGER = LoggerFactory.getLogger("Updater");
@@ -16,10 +15,7 @@ public class Updater extends Thread {
 		int min5 = 5 * minute;
 		do {
 			try {
-				if (GitHelper.updateRepo()) {
-					LOGGER.info("Переходим к сборке");
-					RepoUtils.buildMoveUpdate();
-				}
+				RepoUtils.fullCase();
 			} catch (Exception e) {
 				e.printStackTrace();
 			}

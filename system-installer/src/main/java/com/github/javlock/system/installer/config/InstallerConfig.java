@@ -25,7 +25,6 @@ public class InstallerConfig {
 			ALPHA_CAPS + ALPHA + SPECIAL_CHARS);
 
 	private @Getter @Setter DataSets.VERSIONTYPE version = MAIN;
-	private @Getter @Setter boolean gitOps = true;
 
 	private @Getter @Setter boolean prepare;
 

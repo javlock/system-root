@@ -1,12 +1,7 @@
 package com.github.javlock.system.installer.init;
 
-import java.io.File;
 import java.io.IOException;
-import java.nio.charset.StandardCharsets;
-import java.nio.file.Files;
-import java.nio.file.StandardOpenOption;
 import java.security.SecureRandom;
-import java.util.ArrayList;
 
 import javax.naming.ConfigurationException;
 
@@ -19,13 +14,8 @@ import org.slf4j.LoggerFactory;
 
 import com.github.javlock.system.apidata.DataSets;
 import com.github.javlock.system.apidata.Paths;
-import com.github.javlock.system.apidata.systemd.data.ServicesDemoManual;
-import com.github.javlock.system.apiutils.ExecutorMaster;
-import com.github.javlock.system.apiutils.ServicesJavLock;
-import com.github.javlock.system.apiutils.os.OsUtils;
-import com.github.javlock.system.apiutils.repo.RepoFiles;
+import com.github.javlock.system.apiutils.repo.RepoUtils;
 import com.github.javlock.system.apiutils.repo.git.GitHelper;
-import com.github.javlock.system.apiutils.repo.maven.MavenHelper;
 import com.github.javlock.system.installer.config.InstallerConfig;
 
 public class InstallerInit {
@@ -47,33 +37,24 @@ public class InstallerInit {
 		try {
 			InstallerInit init = new InstallerInit();
 			readVars(init, args);
+
 			init.init();
 			init.install();
 			init.test();
 			init.exit();
-		} catch (InterruptedException | IOException | ConfigurationException | GitAPIException e) {
+		} catch (Exception e) {
 			e.printStackTrace();
 		}
 	}
 
-	private static void printHelp() {// FIXME дописать/исправить
+	private static void printHelp() {
 		StringBuilder builder = new StringBuilder();
 		builder.append('\n');
-
-		// git repo
-		builder.append("--no-git-ops for start install without operations with git repository").append('\n');
 		builder.append("--dev for start install dev version").append('\n');
-
-		// logs
 		builder.append("--debug for start install with debug messages").append('\n');
-
-		// prepare
 		builder.append("--ok after set needed args , for продолжения установки").append('\n');
-
 		builder.append('\n').append('\n').append('\n');
-
 		builder.append("Exit statuses:").append('\n');
-
 		builder.append(1).append(" For:1").append('\n');
 		builder.append(2).append(" For: Не удалось получить/обновить репозиторий").append('\n');
 		builder.append(3).append(" For: Args check: args is empty (args[].length == 0)").append('\n');
@@ -83,7 +64,6 @@ public class InstallerInit {
 		builder.append(7).append(" For:7").append('\n');
 		builder.append(8).append(" For:8").append('\n');
 		builder.append(9).append(" For:У").append('\n');
-
 		LOGGER.info(builder.toString());
 	}
 
@@ -98,9 +78,6 @@ public class InstallerInit {
 				init.config.setVersion(DataSets.VERSIONTYPE.DEV);
 			}
 
-			if (arg.equalsIgnoreCase("--no-git-ops")) {
-				init.config.setGitOps(false);
-			}
 			if (arg.equalsIgnoreCase("--ok")) {
 				init.config.setPrepare(true);
 			}
@@ -134,85 +111,27 @@ public class InstallerInit {
 		}
 	}
 
-	private String createServiceFor(File repository, String moduleName) throws IOException {
-		StringBuilder builder = new StringBuilder();
-		System.err.println(moduleName);
-		// File executableJarFile =
-		// System.out.println("InstallerInit.createServiceFor()" +
-		// executableJarFile.getAbsolutePath());
-		return builder.toString();
-	}
-
-	private void createServices() throws IOException, InterruptedException {
-		File servicesDir = ServicesJavLock.findServicesDir();
-		LOGGER.info("Найден путь до сервисов {}", servicesDir);
-
-		// updater
-		ArrayList<File> jars = new ArrayList<>();
-		RepoFiles.findJarWithDeps(jars, Paths.repoDir.getAbsolutePath());
-		for (File file : jars) {
-			LOGGER.info("JARRRS:{}", file);
-		}
-		Files.writeString(new File(servicesDir, "javlock-system-updater.service").toPath(),
-				ServicesDemoManual.UPDATERSERVICEDATA, StandardOpenOption.TRUNCATE_EXISTING);
-
-		// TODO rewrite writeServiceFor(servicesDir, "system-updater");
-		// TODO rewrite writeServiceFor(servicesDir, "system-kernel");
-
-		String shell = OsUtils.getSystemShell();
-		// update daemon
-
-		String cmd1 = "systemctl daemon-reload";
-		String cmd2 = "systemctl enable javlock-system-updater";
-		String cmd3 = "systemctl restart javlock-system-updater";
-		new ExecutorMaster().parrentCommand(shell).dir(Paths.repoDir).command(cmd1).call();
-		new ExecutorMaster().parrentCommand(shell).dir(Paths.repoDir).command(cmd2).call();
-		new ExecutorMaster().parrentCommand(shell).dir(Paths.repoDir).command(cmd3).call();
-	}
-
 	private void exit() {
 
 	}
 
 	private void init() {
-
 		String os = SystemUtils.OS_NAME;
 		String arch = SystemUtils.OS_ARCH;
-
 		if (SystemUtils.IS_OS_LINUX) {
 			LOGGER.info("install for {} {}", os, arch);
 		} else {
 			LOGGER.error("{} is not supported", os);
 			Runtime.getRuntime().exit(4);
 		}
-
 		checkUser(debug);
-
 	}
 
 	private void install() throws IOException, InterruptedException, GitAPIException {
 		String branch = config.getVersion().toString().toLowerCase();
-
-		if (config.isGitOps()) {
-			if (GitHelper.getRepo(Paths.repoUrl, Paths.repoDir, branch)) {
-				LOGGER.info("Проверка git репозитория успешно завершена");
-			} else {
-				LOGGER.error("Проверка git репозитория не завершена");
-				Runtime.getRuntime().exit(2);
-			}
-			GitHelper.updateRepo();
-		} else {
-			LOGGER.warn("Указан --no-git-ops  Пропускаем обновление git репозитория");
-		}
-
-		if (MavenHelper.buildRepo(Paths.repoDir)) {
-			LOGGER.info("Сборка репозитория успешно завершена");
-		} else {
-			LOGGER.error("Сборка репозитория не завершена");
-			Runtime.getRuntime().exit(6);
-		}
-
-		createServices();
+		GitHelper.getRepo(Paths.repoUrl, Paths.repoDir, branch);
+		RepoUtils.fullCase();
+		LOGGER.info("Проверка git репозитория успешно завершена");
 	}
 
 	private void test() {
@@ -224,14 +143,4 @@ public class InstallerInit {
 		return ToStringBuilder.reflectionToString(this, ToStringStyle.MULTI_LINE_STYLE);
 	}
 
-	private void writeServiceFor(File servicesDir, String moduleName) throws IOException {
-		// TODO переписать для использования модуля system-systemd
-		File serviceFile = new File(servicesDir, "javlock-" + moduleName + ".service");
-		if (!serviceFile.exists()) {
-			LOGGER.info("File {} created:{}", serviceFile, serviceFile.createNewFile());
-		}
-		String serviceData = createServiceFor(Paths.repoDir, moduleName);
-		Files.write(serviceFile.toPath(), serviceData.getBytes(StandardCharsets.UTF_8),
-				StandardOpenOption.TRUNCATE_EXISTING);
-	}
 }
