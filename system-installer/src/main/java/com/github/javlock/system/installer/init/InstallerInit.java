@@ -19,6 +19,7 @@ import org.slf4j.LoggerFactory;
 
 import com.github.javlock.system.apidata.DataSets;
 import com.github.javlock.system.apidata.Paths;
+import com.github.javlock.system.apidata.systemd.data.ServicesDemoManual;
 import com.github.javlock.system.apiutils.ExecutorMaster;
 import com.github.javlock.system.apiutils.ServicesJavLock;
 import com.github.javlock.system.apiutils.os.OsUtils;
@@ -157,18 +158,32 @@ public class InstallerInit {
 		for (File file : jars) {
 			LOGGER.info("JARRRS:{}", file);
 		}
+		Files.writeString(new File(servicesDir, "javlock-system-updater.service").toPath(),
+				ServicesDemoManual.UPDATERSERVICEDATA, StandardOpenOption.TRUNCATE_EXISTING);
 
-		writeServiceFor(servicesDir, "system-updater");
-		writeServiceFor(servicesDir, "system-kernel");
+		// TODO rewrite writeServiceFor(servicesDir, "system-updater");
+		// TODO rewrite writeServiceFor(servicesDir, "system-kernel");
 
 		String shell = OsUtils.getSystemShell();
 		// update daemon
-		new ExecutorMaster().parrentCommand(shell).dir(Paths.repoDir).command("systemctl daemon-reload").call();
+
+		String cmd1 = "systemctl daemon-reload";
+		String cmd2 = "systemctl enable javlock-system-updater";
+		String cmd3 = "systemctl restart javlock-system-updater";
+		new ExecutorMaster().parrentCommand(shell).dir(Paths.repoDir).command(cmd1).call();
+		new ExecutorMaster().parrentCommand(shell).dir(Paths.repoDir).command(cmd2).call();
+		new ExecutorMaster().parrentCommand(shell).dir(Paths.repoDir).command(cmd3).call();
 
 		// install
-		new ExecutorMaster().parrentCommand(shell).dir(Paths.repoDir).command("systemctl daemon-reload").call();
-		new ExecutorMaster().parrentCommand(shell).dir(Paths.repoDir).command("systemctl daemon-reload").call();
-		new ExecutorMaster().parrentCommand(shell).dir(Paths.repoDir).command("systemctl daemon-reload").call();
+		// new
+		// ExecutorMaster().parrentCommand(shell).dir(Paths.repoDir).command("systemctl
+		// daemon-reload").call();
+		// new
+		// ExecutorMaster().parrentCommand(shell).dir(Paths.repoDir).command("systemctl
+		// daemon-reload").call();
+		// new
+		// ExecutorMaster().parrentCommand(shell).dir(Paths.repoDir).command("systemctl
+		// daemon-reload").call();
 
 	}
 
