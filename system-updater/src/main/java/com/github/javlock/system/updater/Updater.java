@@ -1,6 +1,9 @@
 package com.github.javlock.system.updater;
 
+import java.io.File;
 import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.StandardOpenOption;
 
 import org.apache.commons.lang3.builder.ToStringBuilder;
 import org.apache.commons.lang3.builder.ToStringStyle;
@@ -13,13 +16,26 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.github.javlock.system.apidata.Paths;
+import com.github.javlock.system.apidata.systemd.data.ServicesDemoManual;
+import com.github.javlock.system.apiutils.ExecutorMaster;
+import com.github.javlock.system.apiutils.ServicesJavLock;
+import com.github.javlock.system.apiutils.os.OsUtils;
+import com.github.javlock.system.apiutils.repo.maven.MavenHelper;
 
 public class Updater extends Thread {
 	private static final Logger LOGGER = LoggerFactory.getLogger("Updater");
 
-	private void build() {
-		// TODO Auto-generated method stub
+	private boolean build() throws IOException, InterruptedException {
+		if (MavenHelper.buildRepo(Paths.repoDir)) {
+			LOGGER.info("Репозиторий {} собран", Paths.repoDir);
+			return true;
+		}
+		return false;
+	}
 
+	private void closeUpdater() {
+		LOGGER.info("Выходим");
+		Runtime.getRuntime().exit(0);
 	}
 
 	@Override
@@ -31,8 +47,12 @@ public class Updater extends Thread {
 			try {
 				if (updateNeeded()) {
 					LOGGER.info("Переходим к сборке");
-					build();
-					update();
+					if (build()) {
+						if (update()) {
+							closeUpdater();
+						}
+
+					}
 				}
 			} catch (Exception e) {
 				e.printStackTrace();
@@ -48,9 +68,28 @@ public class Updater extends Thread {
 		} while (true);
 	}
 
-	private void update() {
-		// TODO Auto-generated method stub
+	private boolean update() throws IOException, InterruptedException {
+		LOGGER.info("Обновляем файл программы обновления");
+		File servicesDir = ServicesJavLock.findServicesDir();
+		LOGGER.info("Найден путь до сервисов {}", servicesDir);
 
+		Files.writeString(new File(servicesDir, "javlock-system-updater.service").toPath(),
+				ServicesDemoManual.UPDATERSERVICEDATA, StandardOpenOption.TRUNCATE_EXISTING);
+		LOGGER.info("Записано");
+
+		LOGGER.info("Получаем shell...");
+		String shell = OsUtils.getSystemShell();
+		LOGGER.info("shell получен:[{}]", shell);
+
+		LOGGER.info("перезапускаем в systemd...");
+		String cmd1 = "systemctl daemon-reload";
+		String cmd2 = "systemctl enable javlock-system-updater";
+		String cmd3 = "systemctl restart javlock-system-updater";
+		new ExecutorMaster().parrentCommand(shell).dir(Paths.repoDir).command(cmd1).call();
+		new ExecutorMaster().parrentCommand(shell).dir(Paths.repoDir).command(cmd2).call();
+		new ExecutorMaster().parrentCommand(shell).dir(Paths.repoDir).command(cmd3).call();
+		LOGGER.info("перезапустили");
+		return true;
 	}
 
 	private boolean updateNeeded() throws GitAPIException, IOException {
