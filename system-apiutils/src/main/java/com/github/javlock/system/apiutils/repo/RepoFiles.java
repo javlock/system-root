@@ -44,7 +44,7 @@ public class RepoFiles {
 		String updaterPREF = "system-updater";
 		File updaterNewFile = new File(newDir, updaterPREF + ".jar");
 
-		String kernelPREF = "system-updater";
+		String kernelPREF = "system-kernel";
 		File kernelNewFile = new File(newDir, kernelPREF + ".jar");
 
 		for (File file : jars) {
