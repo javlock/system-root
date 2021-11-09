@@ -92,14 +92,9 @@ public class DemoServiceParse {
 
 	};
 
-	private static File find(String what, File where) {
-		return findFileListner.findInDir(what, where);
-	}
-
 	public static void main(String[] args) {
 		try {
 			File serviceDir = ServicesJavLock.findServicesDir();
-
 			boolean fullParseOrTor = true;
 			if (fullParseOrTor) {
 				listener.appendDir(serviceDir);

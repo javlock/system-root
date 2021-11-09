@@ -1,7 +1,14 @@
 package com.github.javlock.system.apidata;
 
 public class DataSets {
+
 	public static class Chars {
+		public static class PrefixSuffix {
+			public static final String GETTER_PREFIX = "get".toUpperCase();
+			public static final String SETTER_PREFIX = "set".toUpperCase();
+
+		}
+
 		/**
 		 * ALPHA_CAPS
 		 */

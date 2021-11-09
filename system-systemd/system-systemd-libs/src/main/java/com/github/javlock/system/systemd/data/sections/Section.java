@@ -40,11 +40,13 @@ public class Section extends SystemdElement {
 	}
 
 	public void appendAfter(SystemdElement element) throws AlreadyExistsException, OperationNotSupportedException {
-		if (!getAfter().contains(element)) {
-			getAfter().add(element);
-		} else {
-			throw new AlreadyExistsException(String.format("after contains %s", element));
-		}
+		/*
+		 * if (!getAfter().contains(element)) { getAfter().add(element); } else {
+		 *
+		 * throw new AlreadyExistsException(String.format("after contains %s",
+		 * element)); }
+		 */
+		throw new AlreadyExistsException("TODO appendAfter");
 	}
 
 }

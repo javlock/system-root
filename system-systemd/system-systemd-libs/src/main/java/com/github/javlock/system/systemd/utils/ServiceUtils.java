@@ -1,12 +1,25 @@
 package com.github.javlock.system.systemd.utils;
 
 import java.io.File;
+import java.lang.reflect.Field;
 
 import com.github.javlock.system.apidata.exceptions.ObjectTypeException;
 import com.github.javlock.system.systemd.data.SystemdElement;
 import com.github.javlock.system.systemd.data.SystemdElement.ELEMENTTYPE;
 
 public class ServiceUtils {
+	public static boolean containsKeyInSystemdElement(Class<SystemdElement> class1, String key) {
+		String realKeyUpperCase = key.toUpperCase();
+		Field[] systemdElementClassFields = class1.getDeclaredFields();
+		for (Field field : systemdElementClassFields) {
+			String fieldNameUpperCase = field.getName().toUpperCase();
+			if (fieldNameUpperCase.equals(realKeyUpperCase)) {
+				return true;
+			}
+		}
+		return false;
+	}
+
 	public static ELEMENTTYPE getElementType(String name) throws IllegalArgumentException, ObjectTypeException {
 		if (name.isEmpty()) {
 			throw new IllegalArgumentException("You fileName.isEmpty");
@@ -27,6 +40,9 @@ public class ServiceUtils {
 
 	public static SystemdElement parseFile(File serviceFile) throws Exception {
 		return new SystemdParser().file(serviceFile).parse(serviceFile);
+	}
+
+	private ServiceUtils() {
 	}
 
 }
