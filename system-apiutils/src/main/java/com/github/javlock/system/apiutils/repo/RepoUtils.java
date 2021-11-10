@@ -4,13 +4,14 @@ import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.StandardOpenOption;
-import java.util.Locale;
 
 import org.eclipse.jgit.api.errors.GitAPIException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.github.javlock.system.apidata.Paths;
+import com.github.javlock.system.apidata.languagepack.LanguagePack;
+import com.github.javlock.system.apidata.languagepack.LanguagePack.LanguagePackKeys;
 import com.github.javlock.system.apidata.systemd.data.ServicesDemoManual;
 import com.github.javlock.system.apiutils.ExecutorMaster;
 import com.github.javlock.system.apiutils.ServicesJavLock;
@@ -36,7 +37,9 @@ public class RepoUtils {
 			File servicesDir = ServicesJavLock.findServicesDir();
 
 			String updaterServiceFileName = "javlock-system-updater";
-			LOGGER.info("Найден путь до сервисов {}", servicesDir);
+
+			String msg = LanguagePack.getString(LanguagePackKeys.FOUNDPATHTOSERVICE);
+			LOGGER.info("{} {}", msg, servicesDir);
 
 			File servicesFile = new File(servicesDir, updaterServiceFileName + ".service");
 
@@ -69,11 +72,10 @@ public class RepoUtils {
 	}
 
 	public static void fullCase() throws GitAPIException, IOException, InterruptedException {
-		Locale locale = Locale.getDefault();
-		LOGGER.info("{}", locale.getLanguage());
-		LOGGER.info("{}", Locale.getDefault());
+
 		// git
-		LOGGER.info("обновляем git репозиторий");
+		String msg1 = LanguagePack.getString(LanguagePackKeys.FOUNDPATHTOSERVICE);
+		LOGGER.info(msg1);
 		boolean stat = GitHelper.updateRepo();
 		LOGGER.info("репозиторий git обновлен");
 		// git
