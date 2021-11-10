@@ -1,14 +1,15 @@
 package com.github.javlock.system.installer.config;
 
-import static com.github.javlock.system.installer.init.InstallerInit.ALPHA;
-import static com.github.javlock.system.installer.init.InstallerInit.ALPHA_CAPS;
-import static com.github.javlock.system.installer.init.InstallerInit.SPECIAL_CHARS;
+import static com.github.javlock.system.apidata.DataSets.Chars.ALPHA;
+import static com.github.javlock.system.apidata.DataSets.Chars.ALPHA_CAPS;
+import static com.github.javlock.system.apidata.DataSets.Chars.SPECIAL_CHARS;
+import static com.github.javlock.system.apidata.DataSets.VERSIONTYPE.MAIN;
 
 import org.apache.commons.lang3.builder.ToStringBuilder;
 import org.apache.commons.lang3.builder.ToStringStyle;
 
+import com.github.javlock.system.apidata.DataSets;
 import com.github.javlock.system.installer.init.InstallerInit;
-import com.github.javlock.system.installer.init.InstallerInit.VERSIONTYPE;
 
 import lombok.Getter;
 import lombok.Setter;
@@ -23,7 +24,9 @@ public class InstallerConfig {
 	private @Getter @Setter String dbUserPassword = InstallerInit.generatePassword(gen(30, 60),
 			ALPHA_CAPS + ALPHA + SPECIAL_CHARS);
 
-	private @Getter @Setter VERSIONTYPE version = VERSIONTYPE.MAIN;
+	private @Getter @Setter DataSets.VERSIONTYPE version = MAIN;
+
+	private @Getter @Setter boolean prepare;
 
 	private int gen(int min, int max) {
 		return min + (int) (Math.random() * ((max - min) + 1));

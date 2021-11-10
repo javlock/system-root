@@ -7,9 +7,5 @@
 		<artifactId>system-root</artifactId>
 		<version>0.0.1-SNAPSHOT</version>
 	</parent>
-	<artifactId>system-systemd</artifactId>
-	<packaging>pom</packaging>
-	<modules>
-		<module>system-systemd-libs</module>
-	</modules>
+	<artifactId>system-apidata</artifactId>
 </project>

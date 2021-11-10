@@ -11,8 +11,8 @@ import java.util.concurrent.CopyOnWriteArrayList;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.github.javlock.system.installer.utils.ExecutorMaster;
-import com.github.javlock.system.installer.utils.ExecutorMasterOutputListener;
+import com.github.javlock.system.apiutils.ExecutorMaster;
+import com.github.javlock.system.apiutils.ExecutorMasterOutputListener;
 
 public class Aalogprof extends Thread {
 	public static final Logger LOGGER = LoggerFactory.getLogger("Aalogprof");
@@ -38,7 +38,7 @@ public class Aalogprof extends Thread {
 
 							@Override
 							public void appendOutput(String line) {
-								System.out.println(line);
+								LOGGER.info(line);
 								try {
 									res.parseLine(line);
 								} catch (Exception e) {
@@ -97,7 +97,7 @@ public class Aalogprof extends Thread {
 					}
 				});
 				int exitStatusReloader = reloader.call();
-				System.err.println(res);
+				LOGGER.info("{}", res);
 
 				res.clear();
 			} catch (IOException e) {

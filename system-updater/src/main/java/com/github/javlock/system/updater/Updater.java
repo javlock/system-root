@@ -1,81 +1,33 @@
 package com.github.javlock.system.updater;
 
-import java.io.File;
-import java.io.IOException;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
-import org.apache.commons.lang3.builder.ToStringBuilder;
-import org.apache.commons.lang3.builder.ToStringStyle;
-import org.eclipse.jgit.api.Git;
-import org.eclipse.jgit.api.PullResult;
-import org.eclipse.jgit.api.errors.CanceledException;
-import org.eclipse.jgit.api.errors.GitAPIException;
-import org.eclipse.jgit.api.errors.InvalidConfigurationException;
-import org.eclipse.jgit.api.errors.InvalidRemoteException;
-import org.eclipse.jgit.api.errors.NoHeadException;
-import org.eclipse.jgit.api.errors.RefNotAdvertisedException;
-import org.eclipse.jgit.api.errors.RefNotFoundException;
-import org.eclipse.jgit.api.errors.TransportException;
-import org.eclipse.jgit.api.errors.WrongRepositoryStateException;
-import org.eclipse.jgit.transport.FetchResult;
-import org.eclipse.jgit.transport.TrackingRefUpdate;
+import com.github.javlock.system.apiutils.repo.RepoUtils;
 
 public class Updater extends Thread {
-	private File repoDir = new File("/opt/javlock-system");
+	private static final Logger LOGGER = LoggerFactory.getLogger("Updater");
 
 	@Override
 	public void run() {
 		int sec = 1000;
 		int minute = 60 * sec;
-
-		int sec10 = 10 * sec;
-		int min5 = 5 * minute;
+		int min1 = 1 * minute;
 		do {
 			try {
-
-				if (updateNeeded()) {
-					update();
-				}
+				RepoUtils.fullCase();
 			} catch (Exception e) {
 				e.printStackTrace();
 			}
-
+			long delay = 0;
 			try {
-				long delay = sec10;
+				delay = min1;
 				Thread.sleep(delay);
 			} catch (InterruptedException e) {
-				e.printStackTrace();
+				LOGGER.error("sleep err with time:{}", delay, e);
+				Thread.currentThread().interrupt();
 			}
 		} while (true);
 	}
 
-	private void update() {
-		System.err.println("получено обновление");
-	}
-
-	private boolean updateNeeded() throws WrongRepositoryStateException, InvalidConfigurationException,
-			InvalidRemoteException, CanceledException, RefNotFoundException, RefNotAdvertisedException, NoHeadException,
-			TransportException, GitAPIException, IOException {
-
-		PullResult pullResult = Git.open(repoDir).pull().call();
-
-		if (pullResult.isSuccessful()) {
-			System.err.println("pullResult.isSuccessful()");
-			FetchResult result = pullResult.getFetchResult();
-
-			int index = 0;
-
-			for (TrackingRefUpdate trackingRefUpdate : result.getTrackingRefUpdates()) {
-				System.err.println("ID:" + index + ":"
-						+ ToStringBuilder.reflectionToString(trackingRefUpdate, ToStringStyle.MULTI_LINE_STYLE));
-
-				System.err.println();
-				index++;
-			}
-			return !result.getTrackingRefUpdates().isEmpty();
-		}
-		System.err.println();
-		System.err.println();
-
-		return false;
-	}
 }

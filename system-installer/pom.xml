@@ -11,6 +11,14 @@
 	<properties>
 		<mainClass>com.github.javlock.system.installer.init.InstallerInit</mainClass>
 	</properties>
+
+	<dependencies>
+		<dependency>
+			<groupId>com.github.javlock</groupId>
+			<artifactId>system-updater</artifactId>
+			<version>0.0.1-SNAPSHOT</version>
+		</dependency>
+	</dependencies>
 	<build>
 		<plugins>
 			<!--JAR -->
@@ -18,7 +26,7 @@
 				<artifactId>maven-assembly-plugin</artifactId>
 				<executions>
 					<execution>
-						<id>make-Installer</id> 
+						<id>make-Installer</id>
 						<phase>package</phase>
 						<configuration>
 							<finalName>${project.artifactId}-${project.version}-git-${git.commit.id.full}</finalName>
@@ -37,7 +45,7 @@
 					</execution>
 
 					<execution>
-						<id>make-Aalogprof allow all</id> 
+						<id>make-Aalogprof allow all</id>
 						<phase>package</phase>
 						<configuration>
 							<finalName>Aalogprof-git-${git.commit.id.full}</finalName>
