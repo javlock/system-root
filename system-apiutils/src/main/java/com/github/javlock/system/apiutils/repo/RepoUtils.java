@@ -69,6 +69,8 @@ public class RepoUtils {
 	}
 
 	public static void fullCase() throws GitAPIException, IOException, InterruptedException {
+		Locale locale = Locale.getDefault();
+		LOGGER.info("{}", locale.getLanguage());
 		LOGGER.info("{}", Locale.getDefault());
 		// git
 		LOGGER.info("обновляем git репозиторий");
