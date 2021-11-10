@@ -30,7 +30,7 @@ public class DataSets {
 	}
 
 	public enum VERSIONTYPE {
-		MAIN, DEV
+		ALPHA, BETA, DEV, MAIN
 	}
 
 }
