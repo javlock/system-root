@@ -2,6 +2,7 @@ package com.github.javlock.system.installer.init;
 
 import java.io.IOException;
 import java.security.SecureRandom;
+import java.util.Arrays;
 
 import javax.naming.ConfigurationException;
 
@@ -50,7 +51,8 @@ public class InstallerInit {
 	private static void printHelp() {
 		StringBuilder builder = new StringBuilder();
 		builder.append('\n');
-		builder.append("--dev for start install dev version").append('\n');
+		builder.append("--version=VALUE for start install value of " + Arrays.toString(DataSets.VERSIONTYPE.values())
+				+ " version").append('\n');
 		builder.append("--debug for start install with debug messages").append('\n');
 		builder.append("--ok after set needed args , for продолжения установки").append('\n');
 		builder.append('\n').append('\n').append('\n');
@@ -72,10 +74,15 @@ public class InstallerInit {
 			printHelp();
 			Runtime.getRuntime().exit(3);
 		}
-		for (String arg : args) {
 
-			if (arg.equalsIgnoreCase("--dev")) {
-				init.config.setVersion(DataSets.VERSIONTYPE.DEV);
+		String vs = "--version=".toUpperCase();
+
+		for (String arg : args) {
+			String argUC = arg.toUpperCase();
+
+			if (argUC.startsWith(vs)) {
+				String value = argUC.split("=")[1].toUpperCase();
+				init.config.setVersion(DataSets.VERSIONTYPE.valueOf(value));
 			}
 
 			if (arg.equalsIgnoreCase("--ok")) {
@@ -86,7 +93,7 @@ public class InstallerInit {
 				init.debug = true;
 			}
 		}
-		LOGGER.info("\n{}", init.config.toString());
+		LOGGER.info("\n{}", init.config);
 		if (!init.config.isPrepare()) {
 			// FIXME дописать
 			throw new ConfigurationException("You not set arg after configurat***: --ok");
@@ -130,7 +137,7 @@ public class InstallerInit {
 	private void install() throws IOException, InterruptedException, GitAPIException {
 		String branch = config.getVersion().toString().toLowerCase();
 		GitHelper.getRepo(Paths.repoUrl, Paths.repoDir, branch);
-		RepoUtils.fullCase();
+		RepoUtils.downloadAndBuild();
 		LOGGER.info("Проверка git репозитория успешно завершена");
 	}
 
