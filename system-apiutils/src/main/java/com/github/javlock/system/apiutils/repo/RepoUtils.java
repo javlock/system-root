@@ -36,8 +36,14 @@ public class RepoUtils {
 
 			String updaterServiceFileName = "javlock-system-updater";
 			LOGGER.info("Найден путь до сервисов {}", servicesDir);
-			Files.writeString(new File(servicesDir, updaterServiceFileName + ".service").toPath(),
-					ServicesDemoManual.UPDATERSERVICEDATA, StandardOpenOption.TRUNCATE_EXISTING);
+
+			File servicesFile = new File(servicesDir, updaterServiceFileName + ".service");
+
+			if (!servicesFile.exists() && servicesFile.createNewFile()) {
+				LOGGER.info("file {} created", servicesFile);
+			}
+			Files.writeString(servicesFile.toPath(), ServicesDemoManual.UPDATERSERVICEDATA,
+					StandardOpenOption.TRUNCATE_EXISTING);
 			LOGGER.info("Записано");
 			// services
 
