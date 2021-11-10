@@ -4,6 +4,7 @@ import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.StandardOpenOption;
+import java.util.Locale;
 
 import org.eclipse.jgit.api.errors.GitAPIException;
 import org.slf4j.Logger;
@@ -68,6 +69,7 @@ public class RepoUtils {
 	}
 
 	public static void fullCase() throws GitAPIException, IOException, InterruptedException {
+		LOGGER.info("{}", Locale.getDefault());
 		// git
 		LOGGER.info("обновляем git репозиторий");
 		boolean stat = GitHelper.updateRepo();
