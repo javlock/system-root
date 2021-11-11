@@ -1,0 +1,5 @@
+FOUND_PATH_TO_SERVICE=en=Found a path to services
+FOUND_PATH_TO_SERVICE=ru=Найден путь до сервисов
+
+UPDATE_GIT_REPO=en=update the git repository
+UPDATE_GIT_REPO=ru=обновляем git репозиторий
