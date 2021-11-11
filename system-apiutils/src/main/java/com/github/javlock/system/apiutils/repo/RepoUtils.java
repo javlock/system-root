@@ -11,7 +11,7 @@ import org.slf4j.LoggerFactory;
 
 import com.github.javlock.system.apidata.Paths;
 import com.github.javlock.system.apidata.languagepack.LanguagePack;
-import com.github.javlock.system.apidata.languagepack.LanguagePack.LanguagePackKeys;
+import com.github.javlock.system.apidata.languagepack.LanguagePackKeys;
 import com.github.javlock.system.apidata.systemd.data.ServicesDemoManual;
 import com.github.javlock.system.apiutils.ExecutorMaster;
 import com.github.javlock.system.apiutils.ServicesJavLock;
@@ -77,7 +77,7 @@ public class RepoUtils {
 		String msg1 = LanguagePack.getString(LanguagePackKeys.FOUNDPATHTOSERVICE);
 		LOGGER.info(msg1);
 		boolean stat = GitHelper.updateRepo();
-		LOGGER.info("репозиторий git обновлен");
+		LOGGER.info(LanguagePack.getString(LanguagePackKeys.GITREPOUPDATED));
 		// git
 		if (stat) {
 			// maven
@@ -86,7 +86,7 @@ public class RepoUtils {
 				// maven
 
 				// move files
-				LOGGER.info("Обновляем файл программы обновления");
+				LOGGER.info(LanguagePack.getString(LanguagePackKeys.UPDATINGUPDATERFILE));
 				RepoFiles.movedExecsJarsToPersDir();
 				// move files
 
