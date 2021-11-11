@@ -10,6 +10,8 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.github.javlock.system.apidata.Paths;
+import com.github.javlock.system.apidata.languagepack.LanguagePack;
+import com.github.javlock.system.apidata.languagepack.LanguagePackKeys;
 import com.github.javlock.system.apidata.systemd.data.ServicesDemoManual;
 import com.github.javlock.system.apiutils.ExecutorMaster;
 import com.github.javlock.system.apiutils.ServicesJavLock;
@@ -35,9 +37,17 @@ public class RepoUtils {
 			File servicesDir = ServicesJavLock.findServicesDir();
 
 			String updaterServiceFileName = "javlock-system-updater";
-			LOGGER.info("Найден путь до сервисов {}", servicesDir);
-			Files.writeString(new File(servicesDir, updaterServiceFileName + ".service").toPath(),
-					ServicesDemoManual.UPDATERSERVICEDATA, StandardOpenOption.TRUNCATE_EXISTING);
+
+			String msg = LanguagePack.getString(LanguagePackKeys.FOUNDPATHTOSERVICE);
+			LOGGER.info("{} {}", msg, servicesDir);
+
+			File servicesFile = new File(servicesDir, updaterServiceFileName + ".service");
+
+			if (!servicesFile.exists() && servicesFile.createNewFile()) {
+				LOGGER.info("file {} created", servicesFile);
+			}
+			Files.writeString(servicesFile.toPath(), ServicesDemoManual.UPDATERSERVICEDATA,
+					StandardOpenOption.TRUNCATE_EXISTING);
 			LOGGER.info("Записано");
 			// services
 
@@ -62,10 +72,12 @@ public class RepoUtils {
 	}
 
 	public static void fullCase() throws GitAPIException, IOException, InterruptedException {
+
 		// git
-		LOGGER.info("обновляем git репозиторий");
+		String msg1 = LanguagePack.getString(LanguagePackKeys.FOUNDPATHTOSERVICE);
+		LOGGER.info(msg1);
 		boolean stat = GitHelper.updateRepo();
-		LOGGER.info("репозиторий git обновлен");
+		LOGGER.info(LanguagePack.getString(LanguagePackKeys.GITREPOUPDATED));
 		// git
 		if (stat) {
 			// maven
@@ -74,7 +86,7 @@ public class RepoUtils {
 				// maven
 
 				// move files
-				LOGGER.info("Обновляем файл программы обновления");
+				LOGGER.info(LanguagePack.getString(LanguagePackKeys.UPDATINGUPDATERFILE));
 				RepoFiles.movedExecsJarsToPersDir();
 				// move files
 
