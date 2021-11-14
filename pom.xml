@@ -14,7 +14,6 @@
 
 
 		<spotbugs-annotations.version>4.4.2</spotbugs-annotations.version>
-		<spotbugs.version>4.2.0</spotbugs.version>
 		<spotbugs.version>4.4.2</spotbugs.version>
 
 		<lombok.version>1.18.22</lombok.version>

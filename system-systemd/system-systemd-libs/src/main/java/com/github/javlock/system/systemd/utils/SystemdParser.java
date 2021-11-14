@@ -32,10 +32,10 @@ import com.github.javlock.system.systemd.data.mount.MOUNT;
 import com.github.javlock.system.systemd.data.path.PATH;
 import com.github.javlock.system.systemd.data.sections.Section;
 import com.github.javlock.system.systemd.data.service.Service;
+import com.github.javlock.system.systemd.data.slice.SLICE;
 import com.github.javlock.system.systemd.data.socket.SOCKET;
 import com.github.javlock.system.systemd.data.target.Target;
 import com.github.javlock.system.systemd.data.timer.Timer;
-import com.github.javlock.system.systemd.utils.slice.SLICE;
 
 import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 

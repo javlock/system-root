@@ -1,4 +1,4 @@
-package com.github.javlock.system.systemd.utils.slice;
+package com.github.javlock.system.systemd.data.slice;
 
 import com.github.javlock.system.apidata.exceptions.ObjectTypeException;
 import com.github.javlock.system.systemd.data.SystemdElement;
