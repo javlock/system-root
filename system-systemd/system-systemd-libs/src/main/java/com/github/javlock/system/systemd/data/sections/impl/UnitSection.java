@@ -9,7 +9,6 @@ public class UnitSection extends Section {
 
 	@Override
 	public SECTIONNAME getName() {
-		return SECTIONNAME.Unit;
+		return SECTIONNAME.UNIT;
 	}
-
 }

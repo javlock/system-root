@@ -136,7 +136,7 @@ public class InstallerInit {
 
 	private void install() throws IOException, InterruptedException, GitAPIException {
 		String branch = config.getVersion().toString().toLowerCase();
-		GitHelper.getRepo(Paths.repoUrl, Paths.repoDir, branch);
+		GitHelper.getRepo(Paths.REPOURL, Paths.repoDir, branch);
 		RepoUtils.downloadAndBuild();
 		LOGGER.info("Проверка git репозитория успешно завершена");
 	}

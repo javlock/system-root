@@ -5,7 +5,7 @@ import com.github.javlock.system.systemd.data.sections.Section;
 public class TimerSection extends Section {
 	@Override
 	public SECTIONNAME getName() {
-		return SECTIONNAME.Timer;
+		return SECTIONNAME.TIMER;
 	}
 
 }

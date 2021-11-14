@@ -29,21 +29,20 @@ public class SystemdElement {
 		CAP_DAC_OVERRIDE, CAP_FOWNER, CAP_SYS_TTY_CONFIG, CAP_LINUX_IMMUTABLE, CAP_SYS_PTRACE, CAP_SYSLOG,
 		CAP_AUDIT_READ, CAP_SETUID, CAP_SETGID, CAP_MAC_OVERRIDE, CAP_SYS_NICE, CAP_SYS_CHROOT, CAP_NET_ADMIN,
 		CAP_NET_BIND_SERVICE, CAP_NET_RAW, CAP_SYS_MODULE, CAP_IPC_LOCK, CAP_AUDIT_WRITE, CAP_KILL, CAP_NET_BROADCAST,
-		CAP_SETPCAP, CAP_SYS_TIME, CAP_FSETID, CAP_MKNOD, CAP_SETFCAP, CAP_SYS_RESOURCE
-
-		, TILDE_CAP_SYS_PTRACE, CAP_BLOCK_SUSPEND
+		CAP_SETPCAP, CAP_SYS_TIME, CAP_FSETID, CAP_MKNOD, CAP_SETFCAP, CAP_SYS_RESOURCE, TILDE_CAP_SYS_PTRACE,
+		CAP_BLOCK_SUSPEND
 	}
 
 	public enum ConditionSecurityType {
-		selinux, apparmor, tomoyo, ima, smack, audit, tpm2, uefi_secureboot
+		SELINUX, APPARMOR, TOMOYO, IMA, SMACK, AUDIT, TPM2, UEFI_SECUREBOOT
 	}
 
 	public enum DefaultDependenciesType {
-		no
+		NO
 	}
 
 	public enum DevicePolicyType {
-		closed
+		CLOSED
 	}
 
 	public enum ELEMENTTYPE {
@@ -51,7 +50,7 @@ public class SystemdElement {
 	}
 
 	public enum IOSchedulingClassType {
-		best_effort, idle
+		BEST_EFFORT, IDLE
 	}
 
 	public enum JobTimeoutActionType {
@@ -59,11 +58,11 @@ public class SystemdElement {
 	}
 
 	public enum KeyringModeType {
-		inherit
+		INHERIT
 	}
 
 	public enum KillModeType {
-		mixed, none, process
+		MIXED, NONE, PROCESS
 	}
 
 	public enum KillSignalType {
@@ -71,7 +70,7 @@ public class SystemdElement {
 	}
 
 	public enum NotifyAccessType {
-		all, main
+		ALL, MAIN
 	}
 
 	public enum OnFailureJobModeType {
@@ -79,7 +78,7 @@ public class SystemdElement {
 	}
 
 	public enum ProtectProcType {
-		invisible
+		INVISIBLE
 	}
 
 	public enum RestartKillSignalType {
@@ -87,7 +86,7 @@ public class SystemdElement {
 	}
 
 	public enum RestartType {
-		always, no, on_abort, on_failure, on_success
+		ALWAYS, NO, ON_ABORT, ON_FAILURE, ON_SUCCESS
 	}
 
 	public enum RestrictAddressFamiliesType {
@@ -95,16 +94,16 @@ public class SystemdElement {
 	}
 
 	public enum SECTIONNAME {
-		NotConfigured, Service, Install, PATH, AUTOMOUNT, Unit, Socket, Timer, Mount, Slice
+		NOTCONFIGURED, SERVICE, INSTALL, PATH, AUTOMOUNT, UNIT, SOCKET, TIMER, MOUNT, SLISE
 	}
 
 	public enum SuccessActionType {
-		reboot, reboot_force, exit_force, poweroff_force
+		REBOOT, REBOOT_FORCE, EXIT_FORCE, POWEROFF_FORCE
 	}
 
 	public enum TypeType {
-		binfmt_misc, btrfs, configfs, dbus, debugfs, exec, forking, fusectl, hugetlbfs, idle, mqueue, notify, oneshot,
-		simple, tmpfs, tracefs
+		BINFMT_MISC, BTRFS, CONFIGFS, DBUS, DEBUGFS, EXEC, FORKING, FUSECTL, HUGETLBFS, IDLE, MQUEUE, NOTIFY, ONESHOT,
+		SIMPLE, TMPFS, TRACEFS
 	}
 
 	// SECTIONs
@@ -118,7 +117,7 @@ public class SystemdElement {
 	private @Setter SliceSection sliceSection;
 	private @Setter MOUNTSection mountSection;
 	// for constr
-	private @Getter @Setter SECTIONNAME name = SECTIONNAME.NotConfigured;
+	private @Getter @Setter SECTIONNAME name = SECTIONNAME.NOTCONFIGURED;
 	private @Getter @Setter String fileName;
 	private @Getter @Setter ELEMENTTYPE elementType;
 

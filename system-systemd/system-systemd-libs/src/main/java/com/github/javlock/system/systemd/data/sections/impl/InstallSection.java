@@ -9,7 +9,7 @@ public class InstallSection extends Section {
 
 	@Override
 	public SECTIONNAME getName() {
-		return SECTIONNAME.Install;
+		return SECTIONNAME.INSTALL;
 	}
 
 }

@@ -9,6 +9,6 @@ public class ServiceSection extends Section {
 
 	@Override
 	public SECTIONNAME getName() {
-		return SECTIONNAME.Service;
+		return SECTIONNAME.SERVICE;
 	}
 }

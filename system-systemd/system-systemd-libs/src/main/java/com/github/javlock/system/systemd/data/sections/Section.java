@@ -9,23 +9,23 @@ import com.github.javlock.system.systemd.data.SystemdElement;
 
 public class Section extends SystemdElement {
 	public static Section getSectionFor(File currentFile, SystemdElement element, SECTIONNAME sectionName) {
-		if (sectionName.equals(SECTIONNAME.Unit)) {
+		if (sectionName.equals(SECTIONNAME.UNIT)) {
 			return element.getOrCreateUnitSection();
-		} else if (sectionName.equals(SECTIONNAME.Service)) {
+		} else if (sectionName.equals(SECTIONNAME.SERVICE)) {
 			return element.getOrCreateServiceSection();
-		} else if (sectionName.equals(SECTIONNAME.Install)) {
+		} else if (sectionName.equals(SECTIONNAME.INSTALL)) {
 			return element.getInstallSection();
 		} else if (sectionName.equals(SECTIONNAME.PATH)) {
 			return element.getOrCreatePathSection();
-		} else if (sectionName.equals(SECTIONNAME.Socket)) {
+		} else if (sectionName.equals(SECTIONNAME.SOCKET)) {
 			return element.getOrCreateSocketSection();
-		} else if (sectionName.equals(SECTIONNAME.Timer)) {
+		} else if (sectionName.equals(SECTIONNAME.TIMER)) {
 			return element.getOrCreateTimerSection();
 		} else if (sectionName.equals(SECTIONNAME.AUTOMOUNT)) {
 			return element.getAutomountSection();
-		} else if (sectionName.equals(SECTIONNAME.Mount)) {
+		} else if (sectionName.equals(SECTIONNAME.MOUNT)) {
 			return element.getMountSection();
-		} else if (sectionName.equals(SECTIONNAME.Slice)) {
+		} else if (sectionName.equals(SECTIONNAME.SLISE)) {
 			return element.getOrCreateSliceSection();
 		}
 

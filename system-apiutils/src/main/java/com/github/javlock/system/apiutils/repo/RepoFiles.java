@@ -5,6 +5,7 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.StandardCopyOption;
 import java.util.ArrayList;
+import java.util.List;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -15,7 +16,7 @@ public class RepoFiles {
 
 	private static final Logger LOGGER = LoggerFactory.getLogger("RepoFiles");
 
-	public static void findJarWithDeps(ArrayList<File> jars, String repository) throws IOException {
+	public static void findJarWithDeps(List<File> jars, String repository) throws IOException {
 		File root = new File(repository);
 		File[] list = root.listFiles();
 		if (list == null) {
@@ -26,7 +27,7 @@ public class RepoFiles {
 				findJarWithDeps(jars, f.getAbsolutePath());
 			} else {
 				String name = f.getName().toLowerCase();
-				if (name.endsWith(Paths.exeJarSuffix)) {
+				if (name.endsWith(Paths.EXEJARSUFFIX)) {
 					jars.add(f);
 				}
 			}
@@ -55,10 +56,10 @@ public class RepoFiles {
 			String fileNameLC = fileName.toLowerCase();
 
 			// files
-			if (fileNameLC.startsWith(updaterPREF.toLowerCase()) && fileNameLC.endsWith(Paths.exeJarSuffix)) {
+			if (fileNameLC.startsWith(updaterPREF.toLowerCase()) && fileNameLC.endsWith(Paths.EXEJARSUFFIX)) {
 				Files.copy(file.toPath(), updaterNewFile.toPath(), StandardCopyOption.REPLACE_EXISTING);
 			}
-			if (fileNameLC.startsWith(kernelPREF.toLowerCase()) && fileNameLC.endsWith(Paths.exeJarSuffix)) {
+			if (fileNameLC.startsWith(kernelPREF.toLowerCase()) && fileNameLC.endsWith(Paths.EXEJARSUFFIX)) {
 				Files.copy(file.toPath(), kernelNewFile.toPath(), StandardCopyOption.REPLACE_EXISTING);
 			}
 
