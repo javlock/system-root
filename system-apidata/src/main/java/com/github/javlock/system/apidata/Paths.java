@@ -15,4 +15,9 @@ public class Paths {
 	public static final File systemdDir2 = new File("/", "etc/systemd/system/");
 
 	public static final String EXEJARSUFFIX = "-jar-with-dependencies.jar";
+
+	public static final String BASH = "bash";
+	private static final String TMP = "/tmp";
+	public static final File TMPDIR = new File(TMP);
+
 }

@@ -15,6 +15,19 @@
 			<artifactId>system-apiutils</artifactId>
 			<version>0.0.1-SNAPSHOT</version>
 		</dependency>
+		  <!-- YAML -->
+                <dependency>
+                        <groupId>com.fasterxml.jackson.dataformat</groupId>
+                        <artifactId>jackson-dataformat-yaml</artifactId>
+                        <version>${jackson.version}</version>
+                </dependency>
+                <dependency>
+                        <groupId>com.fasterxml.jackson.core</groupId>
+                        <artifactId>jackson-databind</artifactId>
+                        <version>${jackson.version}</version>
+                </dependency>
+                <!-- YAML -->
+		
 	</dependencies>
 
 </project>

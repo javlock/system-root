@@ -28,7 +28,8 @@ public class ServiceDemoKernel {
 			// SERVICE
 			// INSTALL
 
-			LOGGER.info("\n{}", kernelService.toServiceFile());
+			String data = kernelService.toServiceFile();
+			LOGGER.info("\n{}", data);
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
