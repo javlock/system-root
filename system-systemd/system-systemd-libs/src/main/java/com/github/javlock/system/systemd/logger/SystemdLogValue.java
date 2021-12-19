@@ -991,8 +991,144 @@ public class SystemdLogValue {
 		if (USERSPACE_USEC != null) {
 			builder.append("USERSPACE_USEC=");
 			builder.append(USERSPACE_USEC);
+			builder.append(", ");
+		}
+		if (_AUDIT_FIELD_SIG != null) {
+			builder.append("_AUDIT_FIELD_SIG=");
+			builder.append(_AUDIT_FIELD_SIG);
+			builder.append(", ");
+		}
+		if (COREDUMP_CGROUP != null) {
+			builder.append("COREDUMP_CGROUP=");
+			builder.append(COREDUMP_CGROUP);
+			builder.append(", ");
+		}
+		if (COREDUMP_CMDLINE != null) {
+			builder.append("COREDUMP_CMDLINE=");
+			builder.append(COREDUMP_CMDLINE);
+			builder.append(", ");
+		}
+		if (COREDUMP_COMM != null) {
+			builder.append("COREDUMP_COMM=");
+			builder.append(COREDUMP_COMM);
+			builder.append(", ");
+		}
+		if (COREDUMP_CWD != null) {
+			builder.append("COREDUMP_CWD=");
+			builder.append(COREDUMP_CWD);
+			builder.append(", ");
+		}
+		if (COREDUMP_ENVIRON != null) {
+			builder.append("COREDUMP_ENVIRON=");
+			builder.append(COREDUMP_ENVIRON);
+			builder.append(", ");
+		}
+		if (COREDUMP_EXE != null) {
+			builder.append("COREDUMP_EXE=");
+			builder.append(COREDUMP_EXE);
+			builder.append(", ");
+		}
+		if (COREDUMP_FILENAME != null) {
+			builder.append("COREDUMP_FILENAME=");
+			builder.append(COREDUMP_FILENAME);
+			builder.append(", ");
+		}
+		if (COREDUMP_GID != null) {
+			builder.append("COREDUMP_GID=");
+			builder.append(COREDUMP_GID);
+			builder.append(", ");
+		}
+		if (COREDUMP_HOSTNAME != null) {
+			builder.append("COREDUMP_HOSTNAME=");
+			builder.append(COREDUMP_HOSTNAME);
+			builder.append(", ");
+		}
+		if (COREDUMP_OPEN_FDS != null) {
+			builder.append("COREDUMP_OPEN_FDS=");
+			builder.append(COREDUMP_OPEN_FDS);
+			builder.append(", ");
+		}
+		if (COREDUMP_OWNER_UID != null) {
+			builder.append("COREDUMP_OWNER_UID=");
+			builder.append(COREDUMP_OWNER_UID);
+			builder.append(", ");
+		}
+		if (COREDUMP_PID != null) {
+			builder.append("COREDUMP_PID=");
+			builder.append(COREDUMP_PID);
+			builder.append(", ");
+		}
+		if (COREDUMP_PROC_CGROUP != null) {
+			builder.append("COREDUMP_PROC_CGROUP=");
+			builder.append(COREDUMP_PROC_CGROUP);
+			builder.append(", ");
+		}
+		if (COREDUMP_PROC_LIMITS != null) {
+			builder.append("COREDUMP_PROC_LIMITS=");
+			builder.append(COREDUMP_PROC_LIMITS);
+			builder.append(", ");
+		}
+		if (COREDUMP_PROC_MAPS != null) {
+			builder.append("COREDUMP_PROC_MAPS=");
+			builder.append(COREDUMP_PROC_MAPS);
+			builder.append(", ");
+		}
+		if (COREDUMP_PROC_MOUNTINFO != null) {
+			builder.append("COREDUMP_PROC_MOUNTINFO=");
+			builder.append(COREDUMP_PROC_MOUNTINFO);
+			builder.append(", ");
+		}
+		if (COREDUMP_PROC_STATUS != null) {
+			builder.append("COREDUMP_PROC_STATUS=");
+			builder.append(COREDUMP_PROC_STATUS);
+			builder.append(", ");
+		}
+		if (COREDUMP_RLIMIT != null) {
+			builder.append("COREDUMP_RLIMIT=");
+			builder.append(COREDUMP_RLIMIT);
+			builder.append(", ");
+		}
+		if (COREDUMP_ROOT != null) {
+			builder.append("COREDUMP_ROOT=");
+			builder.append(COREDUMP_ROOT);
+			builder.append(", ");
+		}
+		if (COREDUMP_SESSION != null) {
+			builder.append("COREDUMP_SESSION=");
+			builder.append(COREDUMP_SESSION);
+			builder.append(", ");
+		}
+		if (COREDUMP_SIGNAL != null) {
+			builder.append("COREDUMP_SIGNAL=");
+			builder.append(COREDUMP_SIGNAL);
+			builder.append(", ");
+		}
+		if (COREDUMP_SIGNAL_NAME != null) {
+			builder.append("COREDUMP_SIGNAL_NAME=");
+			builder.append(COREDUMP_SIGNAL_NAME);
+			builder.append(", ");
+		}
+		if (COREDUMP_SLICE != null) {
+			builder.append("COREDUMP_SLICE=");
+			builder.append(COREDUMP_SLICE);
+			builder.append(", ");
+		}
+		if (COREDUMP_TIMESTAMP != null) {
+			builder.append("COREDUMP_TIMESTAMP=");
+			builder.append(COREDUMP_TIMESTAMP);
+			builder.append(", ");
+		}
+		if (COREDUMP_UID != null) {
+			builder.append("COREDUMP_UID=");
+			builder.append(COREDUMP_UID);
+			builder.append(", ");
+		}
+		if (COREDUMP_UNIT != null) {
+			builder.append("COREDUMP_UNIT=");
+			builder.append(COREDUMP_UNIT);
 		}
 		builder.append("]");
 		return builder.toString();
 	}
+
 }

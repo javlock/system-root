@@ -1,19 +1,17 @@
 package com.github.javlock.system.apiutils.repo;
 
 import java.io.File;
-import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.StandardOpenOption;
 
-import org.eclipse.jgit.api.errors.GitAPIException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.github.javlock.ostools.executor.ExecutorMaster;
 import com.github.javlock.system.apidata.Paths;
 import com.github.javlock.system.apidata.languagepack.LanguagePack;
 import com.github.javlock.system.apidata.languagepack.LanguagePackKeys;
 import com.github.javlock.system.apidata.systemd.data.ServicesDemoManual;
-import com.github.javlock.system.apiutils.ExecutorMaster;
 import com.github.javlock.system.apiutils.ServicesJavLock;
 import com.github.javlock.system.apiutils.os.OsUtils;
 import com.github.javlock.system.apiutils.repo.git.GitHelper;
@@ -22,7 +20,7 @@ import com.github.javlock.system.apiutils.repo.maven.MavenHelper;
 public class RepoUtils {
 	private static final Logger LOGGER = LoggerFactory.getLogger("RepoUtils");
 
-	public static void downloadAndBuild() throws GitAPIException, IOException, InterruptedException {
+	public static void downloadAndBuild() throws Exception {
 		GitHelper.updateRepo();
 		boolean builded = MavenHelper.buildRepo(Paths.repoDir);
 		if (builded) {
@@ -71,7 +69,7 @@ public class RepoUtils {
 
 	}
 
-	public static void fullCase() throws GitAPIException, IOException, InterruptedException {
+	public static void fullCase() throws Exception {
 
 		// git
 		String msg1 = LanguagePack.getString(LanguagePackKeys.FOUNDPATHTOSERVICE);

@@ -1,6 +1,5 @@
 package com.github.javlock.system.installer.init;
 
-import java.io.IOException;
 import java.security.SecureRandom;
 import java.util.Arrays;
 
@@ -9,7 +8,6 @@ import javax.naming.ConfigurationException;
 import org.apache.commons.lang3.SystemUtils;
 import org.apache.commons.lang3.builder.ToStringBuilder;
 import org.apache.commons.lang3.builder.ToStringStyle;
-import org.eclipse.jgit.api.errors.GitAPIException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -134,7 +132,7 @@ public class InstallerInit {
 		checkUser(debug);
 	}
 
-	private void install() throws IOException, InterruptedException, GitAPIException {
+	private void install() throws Exception {
 		String branch = config.getVersion().toString().toLowerCase();
 		GitHelper.getRepo(Paths.REPOURL, Paths.repoDir, branch);
 		RepoUtils.downloadAndBuild();

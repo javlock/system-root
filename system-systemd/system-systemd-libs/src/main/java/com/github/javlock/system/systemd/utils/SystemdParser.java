@@ -133,8 +133,9 @@ public class SystemdParser {
 
 	private static ArrayList<Class<?>> getKeyParamsClasses(Field keyField) {
 		ArrayList<Class<?>> classes = new ArrayList<>();
-		if (keyField.getGenericType()instanceof ParameterizedType generTyp) {
-			ParameterizedType pType = generTyp;
+		Type generTyp = keyField.getGenericType();
+		if (generTyp instanceof ParameterizedType) {
+			ParameterizedType pType = (ParameterizedType) generTyp;
 			Type[] arr = pType.getActualTypeArguments();
 			for (Type tp : arr) {
 				Class<?> clzz = (Class<?>) tp;
